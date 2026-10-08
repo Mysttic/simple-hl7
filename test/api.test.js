@@ -235,9 +235,12 @@ test('GET /api/events/export returns downloadable CSV / NDJSON', async () => {
   const csv = await fetch(base + '/api/events/export?format=csv');
   assert.equal(csv.status, 200);
   assert.match(csv.headers.get('content-type'), /^text\/csv/);
-  assert.match(csv.headers.get('content-disposition'), /^attachment; filename="hl7t-events-.*\.csv"$/);
-  const csvText = await csv.text();
-  assert.ok(csvText.startsWith('id,ts,source,endpointId,connId,type,direction,level,summary,latencyMs'), csvText.slice(0, 120));
+  assert.match(csv.headers.get('content-disposition'), /^attachment; filename="simple-hl7-events-.*\.csv"$/);
+  // text() would drop the BOM, so the bytes are read as they came
+  const csvBytes = Buffer.from(await csv.arrayBuffer());
+  assert.deepEqual([...csvBytes.subarray(0, 3)], [0xef, 0xbb, 0xbf]);
+  const csvText = csvBytes.toString('utf8');
+  assert.ok(csvText.startsWith('\uFEFFid;ts;source;endpointId;connId;type;direction;level;summary;latencyMs'), csvText.slice(0, 120));
   assert.ok(csvText.trim().split('\n').length > 1);
 
   const filtered = await fetch(base + '/api/events/export?format=ndjson&types=msg.in');
@@ -429,4 +432,10 @@ test('unknown routes return JSON 404 and DELETE /api/events clears', async () =>
   assert.equal(cleared.res.status, 204);
   const after = await api('/api/events');
   assert.equal(after.data.events.length, 0);
+});
+
+test('POST /api/scenarios/:name/stop answers 409 when the scenario is not running', async () => {
+  const r = await fetch(base + '/api/scenarios/01_czy_bramka_odpowiada/stop', { method: 'POST' });
+  assert.equal(r.status, 409);
+  assert.match((await r.json()).error, /not running/);
 });

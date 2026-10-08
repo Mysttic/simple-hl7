@@ -342,3 +342,27 @@ test('06 order and result: the ORU sent back to the listener completes the loop'
   assert.equal(run.status, 'passed', JSON.stringify(run.steps.map((st) => st.assertions)));
   assert.equal(run.steps[1].result.data.summary.controlId, 'ORU0001');
 });
+
+test('app.scenarios.stop ends a waiting run at once and a series after the message in flight', async () => {
+  assert.throws(() => app.scenarios.stop('07_odbior_z_bramki'), /not running/);
+  const waiting = app.scenarios.run('07_odbior_z_bramki');
+  await sleep(100);
+  assert.equal(app.scenarios.list().find((s) => s.id === '07_odbior_z_bramki').running, true);
+  assert.deepEqual(app.scenarios.stop('07_odbior_z_bramki'), { stopped: 1 });
+  const run = await waiting;
+  assert.equal(run.status, 'stopped');
+  assert.equal(run.steps[0].status, 'stopped');
+  assert.ok(run.durationMs < 1000, `stopped after ${run.durationMs} ms`);
+  assert.equal(app.scenarios.list().find((s) => s.id === '07_odbior_z_bramki').running, false);
+  const end = app.events.list({ endpointId: run.runId, types: ['scenario.end'] })[0];
+  assert.equal(end.level, 'warn');
+
+  // 08 sends 20 messages 200 ms apart; stopped by its display name after the first few
+  const series = app.scenarios.run('08_czas_odpowiedzi_20x', { target: { host: '127.0.0.1', port: listenerPort, ackTimeoutMs: 5000 } });
+  await sleep(500);
+  app.scenarios.stop('08 Czas odpowiedzi przy 20 wiadomościach');
+  const cut = await series;
+  assert.equal(cut.status, 'stopped');
+  const sent = cut.steps[0].result.results.length;
+  assert.ok(sent >= 1 && sent < 20, `${sent} messages sent`);
+});

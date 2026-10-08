@@ -129,6 +129,7 @@ JSON, błędy jako `{ "error": "..." }` z kodem 400, 404, 409 lub 500. Limit tre
 | GET | `/api/examples` | | wiadomości z `examples/` |
 | GET | `/api/scenarios` | | lista scenariuszy |
 | POST | `/api/scenarios/:name/run` | `{ overrides?: { target, vars, continueOnFailure } }` | przebieg, po jego zakończeniu |
+| POST | `/api/scenarios/:name/stop` | | `{ stopped }`, 409 gdy scenariusz nie działa |
 | GET | `/api/scenarios/runs`, `/api/scenarios/runs/:runId` | | ostatnie przebiegi, jeden przebieg |
 | GET | `/api/config` | | konfiguracja |
 | PUT | `/api/config/ui` | `{ latencyThresholds }` | `config.ui`, zapisane do pliku |
@@ -137,11 +138,11 @@ JSON, błędy jako `{ "error": "..." }` z kodem 400, 404, 409 lub 500. Limit tre
 Przykłady:
 
 ```bash
-curl -s http://localhost:8080/api/health
-curl -s -X POST http://localhost:8080/api/send -H 'Content-Type: application/json' \
+curl -s http://localhost:7575/api/health
+curl -s -X POST http://localhost:7575/api/send -H 'Content-Type: application/json' \
   -d '{"host":"10.0.0.5","port":2575,"encoding":"cp1250","autoControlId":true,"message":"MSH|^~\\&|HIS|SZP|GW|LAB|{{now}}||ADT^A01^ADT_A01|{{controlId}}|P|2.5\rPID|1||123^^^SZP^PI||Kowalski^Jan\r"}'
-curl -s 'http://localhost:8080/api/events?types=ack.in,ack.timeout&limit=50'
-curl -s -o czasy.csv 'http://localhost:8080/api/events/export?format=csv&types=ack.in'
+curl -s 'http://localhost:7575/api/events?types=ack.in,ack.timeout&limit=50'
+curl -s -o czasy.csv 'http://localhost:7575/api/events/export?format=csv&types=ack.in'
 ```
 
 ## WebSocket `/ws`

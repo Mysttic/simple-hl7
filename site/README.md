@@ -25,6 +25,8 @@ Nazwy plików tworzy `scripts/build-exe.mjs`, a plik sum kontrolnych job `releas
 
 ## Podpięcie (jednorazowo, w repozytorium Mysttic/Mysttic)
 
+Zrobione 2026-10-08 dla wersji 0.1.0. Kroki zostają jako opis tego, co jest na hubie.
+
 1. Skopiować `site/simple-hl7/` jako `simple-hl7/` do katalogu głównego huba.
 2. Dodać kartę w głównym `index.html`, obok pozostałych projektów:
 

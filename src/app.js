@@ -14,7 +14,7 @@ import { buildAck } from './hl7/ack.js';
 import { generateControlId } from './hl7/templates.js';
 import { ENCODINGS, encode, decode, checkEncodingConsistency } from './hl7/encoding.js';
 import { saveConfig, deepMerge, isPlainObject } from './config.js';
-import { loadScenarios, parseScenario, runScenario, rememberRun } from './scenarios/runner.js';
+import { loadScenarios, parseScenario, runScenario, rememberRun, STOPPED_MESSAGE } from './scenarios/runner.js';
 import { VERSION } from './runtime.js';
 
 export class AppError extends Error {
@@ -225,10 +225,13 @@ export class App extends EventEmitter {
     }
 
     const runs = [];
+    // runs in progress: { id, name, controller }; a stop request aborts the matching ones
+    const active = new Set();
+    const isRunning = (id) => [...active].some((entry) => entry.id === id);
     const scenariosDir = path.join(this.rootDir, 'scenarios');
     this.scenarios = {
       runs,
-      list: () => loadScenarios(scenariosDir),
+      list: () => loadScenarios(scenariosDir).map((info) => ({ ...info, running: isRunning(info.id) })),
       get: (runId) => runs.find((r) => r.runId === runId),
       run: async (name, overrides = {}) => {
         if (typeof name !== 'string' || !name.trim() || name.length > 200) {
@@ -250,14 +253,34 @@ export class App extends EventEmitter {
         } catch (err) {
           throw new AppError(400, err.message);
         }
+        const entry = { id: info.id, name: info.name, controller: new AbortController() };
+        active.add(entry);
         let run;
         try {
-          run = await runScenario(scenario, this, { overrides: overrides ?? {} });
+          run = await runScenario(scenario, this, { overrides: overrides ?? {}, signal: entry.controller.signal });
         } catch (err) {
           throw err instanceof AppError ? err : new AppError(400, err.message);
+        } finally {
+          active.delete(entry);
         }
         rememberRun(runs, run);
         return run;
+      },
+      /** Stops every running run of the scenario (file name without extension, file name or display name). */
+      stop: (name) => {
+        if (typeof name !== 'string' || !name.trim() || name.length > 200) {
+          throw new AppError(400, 'Scenario name is required');
+        }
+        const wanted = name.trim();
+        const bare = wanted.replace(/\.ya?ml$/i, '');
+        let stopped = 0;
+        for (const entry of active) {
+          if (entry.id !== bare && entry.name !== wanted) continue;
+          entry.controller.abort();
+          stopped += 1;
+        }
+        if (stopped === 0) throw new AppError(409, `Scenario '${wanted}' is not running`);
+        return { stopped };
       }
     };
   }
@@ -481,11 +504,11 @@ export class App extends EventEmitter {
     return listener.status();
   }
 
-  async send(req) {
+  async send(req, { signal = null } = {}) {
     if (!isPlainObject(req)) throw new AppError(400, 'Send request must be an object');
     const merged = validateSendRequest({ ...structuredClone(this.config.senderDefaults ?? {}), ...req });
     try {
-      return await sendMany(merged, this.senderDeps);
+      return await sendMany(merged, this.senderDeps, { signal });
     } catch (err) {
       if (err instanceof AppError) throw err;
       // sendMany throws only for invalid input (bad hex, empty message); network problems come back as ok=false.
@@ -534,9 +557,10 @@ export class App extends EventEmitter {
    * With `sinceId`, messages already received after that event id count too (a gateway may answer
    * before the caller starts waiting); otherwise only new messages count.
    */
-  async waitForMessage(listenerId, { timeoutMs = 10000, match = {}, sinceId = null } = {}) {
+  async waitForMessage(listenerId, { timeoutMs = 10000, match = {}, sinceId = null, signal = null } = {}) {
     const listener = this.getListener(listenerId);
     if (this.stopped) throw new AppError(409, 'Application is stopped');
+    if (signal?.aborted) throw new Error(STOPPED_MESSAGE);
     const timeout = requireNumber(timeoutMs, 'timeoutMs', 1, 3_600_000);
     if (!isPlainObject(match)) throw new AppError(400, "'match' must be an object of HL7 path to expected value");
     const criteria = Object.entries(match);
@@ -565,7 +589,12 @@ export class App extends EventEmitter {
       const cleanup = () => {
         clearTimeout(timer);
         listener.off('message', onMessage);
+        signal?.removeEventListener('abort', onAbort);
         this.waiters.delete(waiter);
+      };
+      const onAbort = () => {
+        cleanup();
+        reject(new Error(STOPPED_MESSAGE));
       };
       const onMessage = ({ event } = {}) => {
         if (!event || !matches(event)) return;
@@ -583,6 +612,7 @@ export class App extends EventEmitter {
       };
       this.waiters.add(waiter);
       listener.on('message', onMessage);
+      signal?.addEventListener('abort', onAbort, { once: true });
     });
   }
 

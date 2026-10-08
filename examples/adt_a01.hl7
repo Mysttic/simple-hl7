@@ -1,5 +1,5 @@
-# Przyjęcie pacjenta (ADT^A01): dane z polskimi znakami, MSH-18 = 8859/2
-MSH|^~\&|HIS|SZPITAL_LODZ|BRAMKA|LAB_CENTRALNE|{{now}}||ADT^A01^ADT_A01|{{controlId}}|P|2.5|||AL|NE|PL|8859/2
+# Przyjęcie pacjenta (ADT^A01): dane z polskimi znakami w UTF-8
+MSH|^~\&|HIS|SZPITAL_LODZ|BRAMKA|LAB_CENTRALNE|{{now}}||ADT^A01^ADT_A01|{{controlId}}|P|2.5|||AL|NE|PL|UNICODE UTF-8
 EVN|A01|{{now}}||||{{now}}
 PID|1||85010212345^^^SZPITAL_LODZ^PI~85010212345^^^PESEL^NNPOL||Zażółć^Gęślą^Jaźń||19850102|M|||ul. Piotrkowska 104^^Łódź^^90-926^PL||+48 42 638 44 44||||||85010212345|||||||||||N
 NK1|1|Zażółć^Łucja^^^^^L|SPO^Małżonek^HL70063|ul. Piotrkowska 104^^Łódź^^90-926^PL|+48 601 234 567

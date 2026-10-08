@@ -327,7 +327,7 @@ export const DATA_LABELS = {
   status: 'Status', passed: 'Kroki udane', failed: 'Kroki nieudane', startedTs: 'Początek', startedMono: 'Początek (ms od startu)',
 };
 const PHASE_LABELS = { connect: 'łączenie', send: 'wysyłka', ack: 'oczekiwanie na ACK' };
-const STATUS_LABELS = { passed: 'OK', failed: 'BŁĄD', error: 'BŁĄD WYKONANIA', skipped: 'pominięty' };
+const STATUS_LABELS = { passed: 'OK', failed: 'BŁĄD', error: 'BŁĄD WYKONANIA', skipped: 'pominięty', stopped: 'ZATRZYMANY' };
 
 export function statusLabel(status) {
   return STATUS_LABELS[status] || status || '';
@@ -339,6 +339,7 @@ export function phaseLabel(phase) {
 
 // Server error messages are English (they also go to logs); the UI shows the known ones in Polish.
 const ERROR_PATTERNS = [
+  [/^Stopped by the user$/, () => 'Zatrzymany przez użytkownika'],
   [/^ACK timeout after (\d+) ms$/, (m) => `Brak ACK po ${m[1]} ms`],
   [/^Connect timeout after (\d+) ms$/, (m) => `Nie udało się połączyć w ${m[1]} ms`],
   [/^Connection closed after (\d+) byte\(s\) of an incomplete ACK \(suffix expected (\w+), got (\w+)\)$/,

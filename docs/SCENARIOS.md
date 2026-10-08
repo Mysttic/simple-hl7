@@ -2,7 +2,7 @@
 
 Scenariusz to plik `scenarios/<nazwa>.yaml` (lub `.yml`) opisujący sekwencję kroków: wyślij wiadomość i sprawdź ACK,
 poczekaj na wiadomość przychodzącą i sprawdź jej pola, odczekaj. Każdy krok ma asercje z wynikiem
-`ok` / `expected` / `actual`, a cały przebieg kończy się statusem `passed`, `failed` lub `error`.
+`ok` / `expected` / `actual`, a cały przebieg kończy się statusem `passed`, `failed`, `error` lub `stopped`.
 Scenariusze służą do powtarzalnych testów odbiorczych u klienta: ten sam plik uruchamiasz po każdej
 zmianie konfiguracji bramki i porównujesz wyniki.
 
@@ -11,6 +11,9 @@ zmianie konfiguracji bramki i porównujesz wyniki.
 - **UI**: panel **Scenariusze**, przycisk **Uruchom** przy wybranym pliku. Pola **Host** i **Port** nad listą
   nadpisują adres bramki z pliku (to samo co `overrides.target` niżej) i są pamiętane w przeglądarce. Puste pola
   oznaczają adres z pliku. Wynik pokazuje kroki, tabelę asercji (oczekiwane vs faktyczne) oraz czasy.
+- **Zatrzymanie**: w trakcie przebiegu kafelek ma przycisk **Zatrzymaj** (REST: `POST /api/scenarios/<nazwa>/stop`,
+  409, gdy scenariusz nie jest uruchomiony). Krok `wait` i `receive` kończy się od razu, seria wysyłek kroku `send`
+  po wiadomości w drodze, pozostałe kroki są pomijane, a przebieg dostaje status `stopped`.
 - **REST**: `POST /api/scenarios/<nazwa>/run` z opcjonalnym body `{ "overrides": { ... } }`. Odpowiedź przychodzi po
   zakończeniu całego przebiegu (ustaw odpowiednio timeout klienta HTTP i proxy). Lista: `GET /api/scenarios`,
   historia: `GET /api/scenarios/runs` (ostatnie 50, najnowszy pierwszy), pojedynczy przebieg: `GET /api/scenarios/runs/<runId>`.
@@ -38,7 +41,7 @@ zmianie konfiguracji bramki i porównujesz wyniki.
 Przykład z linii poleceń:
 
 ```bash
-curl -s -X POST http://localhost:8080/api/scenarios/02_przyjecie_pacjenta_a01/run \
+curl -s -X POST http://localhost:7575/api/scenarios/02_przyjecie_pacjenta_a01/run \
   -H 'Content-Type: application/json' \
   -d '{"overrides":{"target":{"host":"10.20.30.40","port":2575}}}' | jq '.status, .steps[].assertions'
 ```
@@ -213,8 +216,8 @@ z `minAckMs` / `avgAckMs` / `maxAckMs` / `p95AckMs`), kroku `receive` to zdarzen
 Czasy (`durationMs`) liczone są z zegara monotonicznego z dokładnością do mikrosekund.
 
 Statusy kroku: `passed`, `failed` (asercja nie przeszła lub timeout odbioru), `error` (błąd wykonania, np. brak
-pliku, zły hex, nieistniejący listener), `skipped` (pominięty po wcześniejszym niepowodzeniu). Status przebiegu:
-`error`, gdy którykolwiek krok ma status `error`; `failed`, gdy którykolwiek nie przeszedł lub został pominięty;
+pliku, zły hex, nieistniejący listener), `skipped` (pominięty po wcześniejszym niepowodzeniu), `stopped` (przerwany
+zatrzymaniem). Status przebiegu: `stopped`, gdy przebieg zatrzymano; `error`, gdy którykolwiek krok ma status `error`; `failed`, gdy którykolwiek nie przeszedł lub został pominięty;
 `passed`, gdy wszystkie kroki przeszły.
 
 W osi czasu przebieg widać jako `scenario.start` (nazwa, liczba kroków), `scenario.step` dla każdego kroku
@@ -228,6 +231,10 @@ sieciowy scenariusza.
 Przy pierwszym starcie program zapisuje w katalogu `scenarios/` dziewięć gotowych plików. Wszystkie domyślnie
 celują w `127.0.0.1:2575`, czyli we własny listener testera, więc działają od razu jako demonstracja. Do testu
 bramki wpisz jej adres w polach **Host** i **Port** panelu Scenariusze.
+Trzy scenariusze zachowują się bez bramki inaczej niż przy niej: `05` kończy się błędem, bo własny
+listener odpowiada AA na wszystko; `06` czeka na wynik, który trzeba odesłać samemu (w panelu
+**Klient** wybierz przykład `oru_r01` i wyślij go w ciągu 5 minut); `07` czeka na dowolną wiadomość,
+np. wysłaną z panelu **Klient**.
 
 | Plik | Kroki | Oczekiwany wynik przy prawidłowej bramce | Gdy nie przechodzi |
 |---|---|---|---|

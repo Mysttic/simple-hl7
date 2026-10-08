@@ -110,5 +110,6 @@ export const examples = () => request('GET', '/api/examples');
 export const scenarios = () => request('GET', '/api/scenarios');
 export const runScenario = (name, overrides) =>
   request('POST', `/api/scenarios/${encodeURIComponent(name)}/run`, overrides ? { overrides } : {});
+export const stopScenario = (name) => request('POST', `/api/scenarios/${encodeURIComponent(name)}/stop`, {});
 export const scenarioRuns = () => request('GET', '/api/scenarios/runs');
 export const scenarioRun = (runId) => request('GET', `/api/scenarios/runs/${encodeURIComponent(runId)}`);

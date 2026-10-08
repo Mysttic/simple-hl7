@@ -44,6 +44,8 @@ export function createTimeline({ root, filtersRoot, ctx }) {
   const openRequests = [];
   const typeCounts = new Map();
   const endpoints = new Set();
+  // scenario events carry the run id as endpointId: run id -> { name, ts } from scenario.start
+  const runs = new Map();
   const searchCache = new WeakMap();
   const filters = { types: null, endpoint: '', text: '', level: '' };
 
@@ -168,6 +170,14 @@ export function createTimeline({ root, filtersRoot, ctx }) {
       endpoints.add(ev.endpointId);
       endpointsDirty = true;
     }
+    if (ev.source === 'scenario' && ev.endpointId) {
+      const name = ev.type === 'scenario.start' && ev.data && typeof ev.data.name === 'string' ? ev.data.name : null;
+      const known = runs.get(ev.endpointId);
+      if (!known || (name && !known.name)) {
+        runs.set(ev.endpointId, { name: name || (known && known.name) || null, ts: (known && known.ts) || ev.ts });
+        endpointsDirty = true;
+      }
+    }
     if (ev.connId) indexAdd(byConn, ev.connId, ev.id);
     for (const c of controlIdsOf(ev)) indexAdd(byCtrl, c, ev.id);
     const reqId = matchReply(ev);
@@ -281,7 +291,7 @@ export function createTimeline({ root, filtersRoot, ctx }) {
       el('td', { class: 'c-time', title: `${ev.ts}  (zdarzenie #${ev.id})` }, formatTime(ev.ts, ctx.settings.utc)),
       el('td', { class: 'c-delta', title: deltaMs !== null ? `Odstęp od poprzedniego widocznego wiersza: ${formatMs(deltaMs)}` : null }, formatDelta(deltaMs)),
       el('td', { class: 'c-endpoint', title: ev.connId ? `Połączenie ${ev.connId}` : (ev.endpointId || '') },
-        ev.endpointId || '',
+        endpointLabel(ev.endpointId),
         ev.connId ? el('span', { class: 'conn-counter' }, connCounter(ev.connId)) : null),
       el('td', { class: `c-dir ${dir ? `dir-${dir}` : ''}`.trim(), title: dir === 'in' ? 'Przychodzące' : dir === 'out' ? 'Wychodzące' : null }, directionArrow(ev)),
       el('td', { class: 'c-type' }, badge(ev.type, typeClass(ev.type), typeLabel(ev.type))),
@@ -368,6 +378,7 @@ export function createTimeline({ root, filtersRoot, ctx }) {
     openRequests.length = 0;
     typeCounts.clear();
     endpoints.clear();
+    runs.clear();
     endpointsDirty = true;
     lastVisible = null;
     selectedId = null;
@@ -685,14 +696,22 @@ export function createTimeline({ root, filtersRoot, ctx }) {
     rebuildEndpointOptions();
   }
 
+  /** The scenario name for a run id, the id itself for listeners, the sender and the system. */
+  function endpointLabel(id) {
+    const run = runs.get(id);
+    return run ? run.name || 'scenariusz' : id || '';
+  }
+
   function rebuildEndpointOptions() {
     const current = filters.endpoint;
     clear(endpointSel);
     endpointSel.append(el('option', { value: '' }, 'Wszystkie punkty'));
     const list = [...endpoints];
     if (current && !endpoints.has(current)) list.push(current);
-    list.sort((a, b) => String(a).localeCompare(String(b), 'pl'));
-    for (const ep of list) endpointSel.append(el('option', { value: ep }, ep));
+    // runs of the same scenario differ by their start time; they come after the fixed endpoints
+    const label = (ep) => (runs.has(ep) ? `${endpointLabel(ep)}, ${formatTime(runs.get(ep).ts, ctx.settings.utc)}` : String(ep));
+    list.sort((a, b) => (runs.has(a) - runs.has(b)) || label(a).localeCompare(label(b), 'pl'));
+    for (const ep of list) endpointSel.append(el('option', { value: ep }, label(ep)));
     endpointSel.value = current || '';
     endpointsDirty = false;
   }

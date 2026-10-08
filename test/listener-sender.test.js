@@ -92,16 +92,17 @@ describe('EventStore', () => {
     assert.deepEqual(store.list({ types: '' }).map((e) => e.id), [1, 2, 3, 4]);
   });
 
-  test('toCsv quotes commas, quotes and newlines; toNdjson one line per event', () => {
+  test('toCsv is UTF-8 with a BOM, semicolons and a decimal comma; toNdjson one line per event', () => {
     const store = new EventStore();
-    store.push({ type: 'msg.in', source: 'listener', endpointId: 'a', connId: 'a#1', direction: 'in', summary: 'has, comma and "quotes"\nand newline', latencyMs: 1.5 });
+    store.push({ type: 'msg.in', source: 'listener', endpointId: 'a', connId: 'a#1', direction: 'in', summary: 'has; semicolon, comma and "quotes"\nand newline', latencyMs: 1.5 });
     store.push({ type: 'x', summary: 'plain' });
     const csv = store.toCsv(store.list());
-    const lines = csv.split('\n');
-    assert.equal(lines[0], 'id,ts,source,endpointId,connId,type,direction,level,summary,latencyMs');
-    assert.ok(csv.includes('"has, comma and ""quotes""\nand newline"'));
-    assert.ok(csv.endsWith('plain,\n'));
-    assert.equal(lines.filter((l) => l.startsWith('2,')).length, 1);
+    assert.ok(csv.startsWith('\uFEFF'));
+    const lines = csv.slice(1).split('\r\n');
+    assert.equal(lines[0], 'id;ts;source;endpointId;connId;type;direction;level;summary;latencyMs');
+    assert.ok(csv.includes('"has; semicolon, comma and ""quotes""\nand newline";1,5\r\n'));
+    assert.ok(csv.endsWith('plain;\r\n'));
+    assert.equal(lines.filter((l) => l.startsWith('2;')).length, 1);
     const nd = store.toNdjson(store.list());
     const parsed = nd.trim().split('\n').map((l) => JSON.parse(l));
     assert.equal(parsed.length, 2);

@@ -74,7 +74,7 @@ export async function sendMessage(req, deps = {}) {
 }
 
 /** repeat / intervalMs / keepAlive; template and control id are rendered per message. */
-export async function sendMany(req, deps = {}) {
+export async function sendMany(req, deps = {}, { signal = null } = {}) {
   const d = normalizeDeps(deps);
   const merged = mergeRequest(req);
   const repeat = clampInt(merged.repeat, 1, 1, 1000000);
@@ -92,12 +92,14 @@ export async function sendMany(req, deps = {}) {
   }
   try {
     for (let i = 0; i < repeat; i += 1) {
+      // a stopped scenario ends the series after the message already in flight
+      if (i > 0 && signal?.aborted) break;
       const single = { ...merged, repeat: 1, repeatIndex: i, repeatTotal: repeat, attempt: 1 };
       const result = conn
         ? await conn.send(single, metaFromRequest(single))
         : await sendMessage(single, d);
       results.push(result);
-      if (i < repeat - 1 && intervalMs > 0) await sleep(intervalMs);
+      if (i < repeat - 1 && intervalMs > 0) await sleep(intervalMs, signal);
     }
   } finally {
     if (conn) await conn.close();
@@ -961,6 +963,16 @@ function round3(x) {
   return Math.round(x * 1000) / 1000;
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+/** Waits ms, or less when the signal aborts. */
+function sleep(ms, signal = null) {
+  return new Promise((resolve) => {
+    if (signal?.aborted) return resolve();
+    const done = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', done);
+      resolve();
+    };
+    const timer = setTimeout(done, ms);
+    signal?.addEventListener('abort', done, { once: true });
+  });
 }

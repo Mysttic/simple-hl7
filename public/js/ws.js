@@ -46,7 +46,8 @@ export function createWsClient({
 
   function setStatus(next, extra = {}) {
     status = next;
-    if (bannerEl) bannerEl.hidden = next === 'open';
+    // The first attempt after the page loads is not a failure yet, so it shows no banner.
+    if (bannerEl) bannerEl.hidden = next === 'open' || (next === 'connecting' && attempt === 0);
     if (typeof onStatus === 'function') {
       try {
         onStatus(next, { attempt, rttMs, offsetMs, everConnected, ...extra });

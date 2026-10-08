@@ -17,6 +17,7 @@ const SINK_QUEUE_LIMIT = 10000;
 export const CSV_COLUMNS = [
   'id', 'ts', 'source', 'endpointId', 'connId', 'type', 'direction', 'level', 'summary', 'latencyMs',
 ];
+const CSV_SEPARATOR = ';';
 
 /** Wall clock + monotonic snapshot. Take it once per step and reuse it. */
 export function now() {
@@ -150,12 +151,16 @@ export class EventStore extends EventEmitter {
   }
 
   /** RFC 4180 style CSV (LF line endings, fields quoted when needed). */
+  /**
+   * CSV for a spreadsheet set to Polish: UTF-8 with a BOM (without it Excel reads the file as
+   * cp1250), a semicolon between columns and a decimal comma, so a double click opens it in columns.
+   */
   toCsv(events) {
-    const rows = [CSV_COLUMNS.join(',')];
+    const rows = [CSV_COLUMNS.join(CSV_SEPARATOR)];
     for (const ev of toArray(events)) {
-      rows.push(CSV_COLUMNS.map((col) => csvCell(ev[col])).join(','));
+      rows.push(CSV_COLUMNS.map((col) => csvCell(ev[col])).join(CSV_SEPARATOR));
     }
-    return `${rows.join('\n')}\n`;
+    return `\uFEFF${rows.join('\r\n')}\r\n`;
   }
 
   toNdjson(events) {
@@ -252,8 +257,9 @@ function normalizeTypes(types) {
 
 function csvCell(value) {
   if (value === null || value === undefined) return '';
+  if (typeof value === 'number') return String(value).replace('.', ',');
   const str = typeof value === 'string' ? value : String(value);
-  if (/[",\r\n]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
+  if (/[";\r\n]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
   return str;
 }
 

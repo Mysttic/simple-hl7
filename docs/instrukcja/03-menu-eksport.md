@@ -11,10 +11,11 @@ plik do folderu pobierania przeglądarki. Menu zamyka się po wyborze albo po kl
 
 | Pozycja | Zawartość pliku | Do czego |
 |---|---|---|
-| **CSV** | jeden wiersz na zdarzenie, kolumny: `id`, `ts` (czas ISO z milisekundami, UTC), `source`, `endpointId`, `connId`, `type`, `direction`, `level`, `summary`, `latencyMs` | otwarcie w arkuszu, tabela czasów odpowiedzi do raportu z testów |
+| **CSV** | jeden wiersz na zdarzenie, średnik między kolumnami, przecinek dziesiętny, UTF-8 z BOM; kolumny: `id`, `ts` (czas ISO z milisekundami, UTC), `source`, `endpointId`, `connId`, `type`, `direction`, `level`, `summary`, `latencyMs` | otwarcie w arkuszu, tabela czasów odpowiedzi do raportu z testów |
 | **NDJSON** | jedno pełne zdarzenie w formacie JSON na wiersz, razem z treścią wiadomości, bajtami w hex, analizą ramki i wszystkimi czasami | archiwum testu, analiza problemu, przekazanie do zespołu bramki |
 
-Plik ma nazwę `hl7t-events-<data i godzina>.csv` albo `.ndjson`.
+Plik ma nazwę `simple-hl7-events-<data i godzina>.csv` albo `.ndjson`. CSV jest przygotowany pod Excela
+z polskimi ustawieniami: otwiera się dwuklikiem od razu w kolumnach, z polskimi znakami i liczbami.
 
 ## Co trafia do pliku
 

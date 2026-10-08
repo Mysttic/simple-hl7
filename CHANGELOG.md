@@ -7,6 +7,31 @@ ostatniego wydanego tagu.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-08
+
+### Dodane
+
+- Przycisk **Zatrzymaj** na kafelku uruchomionego scenariusza i `POST /api/scenarios/<nazwa>/stop`: czekanie
+  kończy się od razu, seria wysyłek po wiadomości w drodze, przebieg dostaje status `stopped`.
+
+### Zmienione
+
+- Domyślny port interfejsu to `7575` zamiast zajętego często `8080` ([#1](https://github.com/Mysttic/simple-hl7/issues/1)).
+  Istniejąca instalacja zachowuje port zapisany w swoim `config/app.json`.
+- CSV z eksportu ma średnik, przecinek dziesiętny i BOM UTF-8, więc polski Excel otwiera go dwuklikiem w kolumnach.
+- Plik eksportu nazywa się `simple-hl7-events-<data>`.
+- Przykład `adt_a01` deklaruje UTF-8, w którym klient go domyślnie wysyła; scenariusz `04` ma własną kopię
+  w ISO-8859-2. Przykład `oru_r01` jest wynikiem zlecenia z `orm_o01`, więc scenariusz `06` da się
+  zamknąć bez bramki, wysyłając go z panelu Klient.
+- Oś czasu i filtr punktów pokazują nazwę scenariusza zamiast identyfikatora uruchomienia.
+- Edytor klienta przy pierwszym uruchomieniu ma gotową wiadomość zamiast pustego pola.
+
+### Naprawione
+
+- Czerwony pasek „Brak połączenia z serwerem” nie miga już przy każdym otwarciu strony.
+- Wysokość inspektora zapamiętana na większym oknie nie zasłania osi czasu.
+- Job `site` przy odrzuconym `HUB_TOKEN` mówi wprost, że token jest zły.
+
 ## [0.1.0] - 2026-10-08
 
 Pierwsze wydanie.

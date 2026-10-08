@@ -219,7 +219,8 @@ textarea { resize: vertical; min-height: 60px; }
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
-  grid-template-columns: var(--left-w) minmax(0, 1fr) var(--inspector-w);
+  /* min() keeps a size saved on a bigger window from squeezing the timeline out */
+  grid-template-columns: var(--left-w) minmax(0, 1fr) min(var(--inspector-w), 70vw);
   grid-template-rows: minmax(0, 1fr);
   grid-template-areas: "left center inspector";
 }
@@ -271,7 +272,7 @@ textarea { resize: vertical; min-height: 60px; }
   :root { --left-w: 340px; }
   .main {
     grid-template-columns: var(--left-w) minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) var(--inspector-h);
+    grid-template-rows: minmax(0, 1fr) min(var(--inspector-h), calc(100vh - 200px));
     grid-template-areas: "left center" "left inspector";
   }
   .main.inspector-collapsed { grid-template-columns: var(--left-w) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 0; }
@@ -488,6 +489,7 @@ textarea { resize: vertical; min-height: 60px; }
 .step.step-ok { border-left-color: var(--green); }
 .step.step-bad { border-left-color: var(--red); }
 .step.step-dim { border-left-color: var(--fg-mute); opacity: 0.8; }
+.step.step-warn { border-left-color: var(--yellow); }
 .step summary { cursor: pointer; padding: 4px 8px; font-size: var(--fs-sm); }
 .step-body { padding: 4px 8px 8px; }
 .step-name { font-weight: 600; }
