@@ -1,0 +1,21 @@
+name: 05 Błędna wiadomość jest odrzucana
+description: >-
+  Wysyła ADT^A01 bez segmentu PID. Bramka z walidacją powinna odpowiedzieć AE albo AR, nadal ze
+  zgodnym MSA-2. Jeśli bramka przyjmuje wszystko (AA), to też jest informacja: zanotuj to
+  i ustal z klientem, czy tak ma być.
+target:
+  host: 127.0.0.1
+  port: 2575
+  ackTimeoutMs: 5000
+steps:
+  - name: ADT^A01 bez PID
+    send:
+      autoControlId: true
+      message: |
+        MSH|^~\&|HIS|SZPITAL|BRAMKA|LAB|{{now}}||ADT^A01^ADT_A01|{{controlId}}|P|2.5
+        EVN|A01|{{now}}
+        PV1|1|I|ODDZ_WEWN
+    expect:
+      ack:
+        msa1: [AE, AR]
+        controlIdMatches: true

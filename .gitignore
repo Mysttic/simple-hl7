@@ -1,0 +1,8 @@
+node_modules/
+/build/
+/dist/
+/test-tmp/
+/config/
+/logs/
+/.claude/
+*.part

@@ -1,0 +1,32 @@
+{
+  "name": "simple-hl7",
+  "version": "0.0.0",
+  "private": true,
+  "description": "HL7 v2 gateway tester over MLLP: server and client, framing (prefix / suffix) verification, live monitoring with timings. The version number lives in VERSION.md.",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test \"test/**/*.test.js\"",
+    "build:exe": "node scripts/build-exe.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "iconv-lite": "^0.6.3",
+    "js-yaml": "^4.1.0",
+    "ws": "^8.18.0"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "postject": "^1.0.0-alpha.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mysttic/simple-hl7.git"
+  }
+}

@@ -1,0 +1,19 @@
+name: 08 Czas odpowiedzi przy 20 wiadomościach
+description: >-
+  20 wiadomości ADT^A08 co 200 ms na jednym połączeniu TCP, tak jak robi to typowy system HIS.
+  Każdy ACK musi być AA, zgodny z MSH-10 i przyjść w czasie do 500 ms. Podsumowanie
+  (min, średnia, max, p95) widać w wyniku kroku.
+target:
+  host: 127.0.0.1
+  port: 2575
+  ackTimeoutMs: 5000
+steps:
+  - name: 20 x ADT^A08 co 200 ms
+    send:
+      file: examples/adt_a08.hl7
+      autoControlId: true
+      repeat: 20
+      intervalMs: 200
+      keepAlive: true
+    expect:
+      ack: { msa1: AA, controlIdMatches: true, maxAckMs: 500 }

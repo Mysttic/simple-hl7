@@ -1,0 +1,10 @@
+# Nowa wizyta (SIU^S12): rezerwacja terminu konsultacji w poradni kardiologicznej
+MSH|^~\&|HIS|SZPITAL_LODZ|PORADNIA|PORADNIA_KARDIO|{{now}}||SIU^S12^SIU_S12|{{controlId}}|P|2.5|||AL|NE|PL|UNICODE UTF-8
+SCH|WIZ-2026-00321^HIS||||||KONS^Konsultacja kardiologiczna^L|ROUTINE^Planowa^HL70276|30|min|^^30^{{now:YYYYMMDD}}100000^{{now:YYYYMMDD}}100000|||||34567^Żółkiewska^Grażyna^^^rej.|||||||||Booked^Zarezerwowana^HL70278
+PID|1||65072154321^^^SZPITAL_LODZ^PI~65072154321^^^PESEL^NNPOL||Łódzka^Gęśla^Źdźbło||19650721|F|||ul. Żeromskiego 113^^Łódź^^90-549^PL||+48 42 639 30 00
+PV1|1|O|PORADNIA_KARDIO^GAB_2^^SZPITAL_LODZ
+RGS|1|A
+AIS|1|A|KONS^Konsultacja kardiologiczna^L|{{now:YYYYMMDD}}100000||30|min
+AIG|1|A|45678^Kardiolog^Paweł^^^dr n. med.|LEK^Lekarz^L
+AIL|1|A|PORADNIA_KARDIO^GAB_2^^SZPITAL_LODZ|GAB^Gabinet^L
+AIP|1|A|45678^Kardiolog^Paweł^^^dr n. med.|LEK^Lekarz prowadzący^L

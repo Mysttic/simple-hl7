@@ -1,0 +1,18 @@
+name: 09 Ramka ze złym sufiksem nie jest przyjmowana
+description: >-
+  Wysyła wiadomość zakończoną 0D 0A zamiast 1C 0D. Poprawna bramka MLLP nie rozpozna końca
+  ramki i nie odeśle ACK, więc oczekiwany jest timeout po 3 s. Jeśli przyjdzie ACK, bramka
+  ma luźne ramkowanie i warto to zgłosić.
+target:
+  host: 127.0.0.1
+  port: 2575
+  suffixHex: "0D0A"
+  ackTimeoutMs: 3000
+steps:
+  - name: ADT^A08 z sufiksem 0D0A
+    send:
+      file: examples/adt_a08.hl7
+      autoControlId: true
+    expect:
+      ack:
+        timeout: true

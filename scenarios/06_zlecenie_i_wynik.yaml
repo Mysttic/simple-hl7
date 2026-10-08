@@ -1,0 +1,34 @@
+name: 06 Zlecenie do laboratorium i wynik zwrotny
+description: >-
+  Pełna pętla przez bramkę. Wysyła zlecenie ORM^O01, a potem czeka do 5 minut, aż na listener
+  "default" przyjdzie wynik ORU^R01 dla tego samego pacjenta (PID-3.1) i tego samego zlecenia
+  (OBR-2.1). Bramka albo system laboratoryjny musi być skonfigurowany tak, żeby odsyłał wyniki
+  na adres i port testera.
+target:
+  host: 127.0.0.1
+  port: 2575
+  ackTimeoutMs: 5000
+vars:
+  pesel: "78030398765"
+  zlecenie: "ZL-2026-004522"
+steps:
+  - name: Wyślij zlecenie ORM^O01
+    send:
+      file: examples/orm_o01.hl7
+      autoControlId: true
+    expect:
+      ack: { msa1: AA, controlIdMatches: true }
+  - name: Czekaj na wynik ORU^R01
+    receive:
+      listenerId: default
+      timeoutMs: 300000
+      match:
+        "MSH-9.1": ORU
+        "PID-3.1": "{{vars.pesel}}"
+    expect:
+      fields:
+        "OBR-2.1": "{{vars.zlecenie}}"
+      framing:
+        prefixOk: true
+        suffixOk: true
+        segmentSeparator: CR

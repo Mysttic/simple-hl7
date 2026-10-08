@@ -1,0 +1,12 @@
+# Wynik badania laboratoryjnego (ORU^R01): morfologia krwi, segmenty OBX z komentarzami NTE
+MSH|^~\&|LIS|LAB_CENTRALNE|HIS|SZPITAL_LODZ|{{now}}||ORU^R01^ORU_R01|{{controlId}}|P|2.5|||AL|NE|PL|UNICODE UTF-8
+PID|1||90120567890^^^SZPITAL_LODZ^PI~90120567890^^^PESEL^NNPOL||Gęślą^Jaźń^Zażółć||19901205|F|||ul. Świętokrzyska 14^^Kraków^^31-201^PL
+PV1|1|O|PORADNIA_LEK^^^SZPITAL_LODZ|||||||LAB
+ORC|RE|ZL-2026-004521^HIS|LAB-2026-118877^LIS||CM||||{{now}}|||67890^Nowak-Wiśniewska^Żaneta^^^lek.
+OBR|1|ZL-2026-004521^HIS|LAB-2026-118877^LIS|58410-2^Morfologia krwi^LN|||{{now}}|||||||{{now}}||67890^Nowak-Wiśniewska^Żaneta^^^lek.||||||{{now}}|||F
+OBX|1|NM|718-7^Hemoglobina^LN||13.8|g/dL|12.0-16.0|N|||F|||{{now}}
+NTE|1|L|Wynik w normie, próbka pobrana na czczo.
+OBX|2|NM|6690-2^Leukocyty^LN||11.2|10*3/uL|4.0-10.0|H|||F|||{{now}}
+NTE|1|L|Wartość podwyższona, zalecana kontrola za 7 dni.
+OBX|3|NM|777-3^Płytki krwi^LN||245|10*3/uL|150-400|N|||F|||{{now}}
+OBX|4|ST|UWAGI^Uwagi laboratorium^L||Zażółć gęślą jaźń: test polskich znaków||||||F

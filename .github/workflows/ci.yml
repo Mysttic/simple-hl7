@@ -1,0 +1,120 @@
+# Runs the tests on a pull request from develop into master, on a manual run and when another
+# workflow calls it. Nothing else starts CI: a push to develop, or a pull request into develop,
+# runs nothing at all (the same trade for Actions minutes as in simple-rest).
+#
+# A pull request into master from a branch other than develop leaves every job skipped, and GitHub
+# reports such a run as green.
+#
+# "Build" makes the single executable on both release platforms and starts it (scripts/smoke-exe.mjs),
+# so a broken build fails here, on the pull request, instead of in release.yml after the merge.
+# The Windows job is the expensive one (Windows minutes count double on private repositories); it
+# stays because Node SEA builds only for the platform it runs on. Nothing uploads dist/.
+#
+# A pull request into master also gets a preview of what merging it publishes.
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - 'site/**'
+      - '.gitignore'
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests
+    # github.head_ref is empty outside a pull request, so a manual run and a workflow_call still
+    # reach the steps.
+    if: github.event_name != 'pull_request' || github.head_ref == 'develop'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Syntax of every source file
+        run: |
+          set -e
+          for f in src/*.js src/*/*.js public/js/*.js scripts/*.mjs scripts/lib/*.mjs; do node --check "$f"; done
+      - name: Tests
+        run: npm test
+
+  build:
+    name: Build (${{ matrix.target }})
+    if: github.event_name != 'pull_request' || github.head_ref == 'develop'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: windows-amd64
+            file: simple-hl7-*-windows-amd64.exe
+          - os: ubuntu-latest
+            target: linux-amd64
+            file: simple-hl7-*-linux-amd64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Single executable
+        run: node scripts/build-exe.mjs
+      - name: Start it in an empty folder and pass one message
+        run: node scripts/smoke-exe.mjs dist/${{ matrix.file }}
+
+  release-preview:
+    name: Release preview
+    if: github.event_name == 'pull_request' && github.base_ref == 'master' && github.head_ref == 'develop'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compare VERSION.md with the newest tag
+        id: v
+        run: |
+          set -o pipefail
+          sh scripts/release-version.sh | tee -a "$GITHUB_OUTPUT"
+
+      - name: What merging does
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+          PREVIOUS: ${{ steps.v.outputs.previous }}
+          PUBLISHING: ${{ steps.v.outputs.publishing }}
+        # release.yml starts on a push to master only when that push changes VERSION.md. HEAD here
+        # is the test merge of this PR into master, so HEAD^1 is master and this diff is what the
+        # merge pushes.
+        run: |
+          touched=$(git diff --name-only HEAD^1 HEAD -- VERSION.md)
+          if [ "$PUBLISHING" != "true" ]; then
+            echo "VERSION.md holds $VERSION, the same as the newest release: merging publishes nothing." >> "$GITHUB_STEP_SUMMARY"
+          elif [ -z "$touched" ]; then
+            msg="VERSION.md holds $VERSION, not released yet (newest release: $PREVIOUS), but this PR does not change VERSION.md: merging it starts no release. After the merge use Run workflow on the Release workflow, on master."
+            echo "::warning::$msg"
+            echo "$msg" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Merging this PR publishes **v$VERSION** (newest release so far: $PREVIOUS) and copies it to the site." >> "$GITHUB_STEP_SUMMARY"
+          fi

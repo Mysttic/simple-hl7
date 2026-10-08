@@ -1,0 +1,5 @@
+# Uszkodzona wiadomość bez segmentu MSH: test odporności bramki na błędne dane
+PID|1||00000000000^^^TEST^PI||Testowy^Pacjent||19700101|M
+PV1|1|O|TEST
+to nie jest poprawny segment HL7
+ZZZ|x|y

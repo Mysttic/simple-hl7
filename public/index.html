@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>simple-hl7</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2311151b'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='13' font-weight='700' text-anchor='middle' fill='%234f8cff'%3EHL7%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <header id="topbar" class="topbar">
+    <div class="brand" title="simple-hl7: tester bramek HL7, nasłuch i nadawca MLLP z monitoringiem czasów">
+      <span class="brand-logo">HL7</span>
+      <span class="brand-name">simple-hl7</span>
+      <span id="app-version" class="brand-version mono"></span>
+    </div>
+    <div class="topbar-status">
+      <span id="ws-status" class="ws-status ws-connecting" title="Stan połączenia WebSocket z serwerem">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="label">łączenie...</span>
+      </span>
+      <span id="server-clock" class="server-clock mono" title="Czas serwera" aria-live="off">--:--:--.---</span>
+      <span id="event-counter" class="event-counter mono" title="Widoczne / wszystkie zdarzenia">0 / 0</span>
+    </div>
+    <div class="topbar-actions">
+      <button id="btn-pause" class="btn" type="button" title="Wstrzymaj autoprzewijanie osi czasu (spacja)">⏸ Autoprzewijanie</button>
+      <button id="btn-filters" class="btn" type="button" title="Pokaż / ukryj pasek filtrów (/)">Filtry</button>
+      <div class="dropdown">
+        <button id="btn-export" class="btn" type="button" title="Eksportuj zdarzenia z bieżącymi filtrami" aria-haspopup="true" aria-expanded="false">Eksport ▾</button>
+        <div id="export-menu" class="dropdown-menu" hidden>
+          <button type="button" data-format="csv" title="Plik CSV: id, czas, źródło, typ, opis, czas odpowiedzi">CSV</button>
+          <button type="button" data-format="ndjson" title="Plik NDJSON: jedno pełne zdarzenie na wiersz">NDJSON</button>
+        </div>
+      </div>
+      <button id="btn-clear" class="btn btn-danger-ghost" type="button" title="Wyczyść bufor zdarzeń na serwerze (z potwierdzeniem)">Wyczyść</button>
+      <button id="btn-settings" class="btn" type="button" title="Ustawienia: progi czasów, zdarzenia bajtowe, strefa czasu">⚙ Ustawienia</button>
+      <button id="btn-inspector" class="btn" type="button" title="Pokaż / ukryj inspektor (i)">Inspektor</button>
+    </div>
+  </header>
+
+  <div id="ws-banner" class="ws-banner" role="alert" hidden title="Kliknij, aby spróbować połączyć się teraz">
+    Brak połączenia z serwerem, ponawiam...
+  </div>
+
+  <main id="main" class="main">
+    <aside id="left" class="left" aria-label="Panele sterowania">
+      <section class="panel" id="panel-listeners" data-panel="listeners">
+        <header class="panel-header">
+          <button class="panel-toggle" type="button" aria-expanded="true" title="Zwiń / rozwiń sekcję">
+            <span class="chevron" aria-hidden="true"></span>Serwer <span class="panel-sub">nasłuch MLLP, bramka łączy się do nas</span>
+          </button>
+          <div class="panel-tools">
+            <button id="btn-add-listener" class="btn btn-sm" type="button" title="Dodaj nowy serwer MLLP (nasłuch na porcie)">+ Dodaj</button>
+          </div>
+        </header>
+        <div class="panel-body" id="listeners-body"></div>
+      </section>
+
+      <section class="panel" id="panel-sender" data-panel="sender">
+        <header class="panel-header">
+          <button class="panel-toggle" type="button" aria-expanded="true" title="Zwiń / rozwiń sekcję">
+            <span class="chevron" aria-hidden="true"></span>Klient <span class="panel-sub">łączymy się do bramki i wysyłamy</span>
+          </button>
+        </header>
+        <div class="panel-body" id="sender-body"></div>
+      </section>
+
+      <section class="panel" id="panel-scenarios" data-panel="scenarios">
+        <header class="panel-header">
+          <button class="panel-toggle" type="button" aria-expanded="true" title="Zwiń / rozwiń sekcję">
+            <span class="chevron" aria-hidden="true"></span>Scenariusze
+          </button>
+        </header>
+        <div class="panel-body" id="scenarios-body"></div>
+      </section>
+    </aside>
+
+    <section id="center" class="center" aria-label="Oś czasu zdarzeń">
+      <div id="filters" class="filters" hidden></div>
+      <div id="timeline" class="timeline-wrap"></div>
+    </section>
+
+    <aside id="inspector" class="inspector" aria-label="Inspektor zdarzenia">
+      <div id="inspector-handle" class="inspector-handle" title="Przeciągnij, aby zmienić rozmiar (dwuklik przywraca domyślny)"></div>
+      <div class="inspector-top">
+        <span class="inspector-title">Inspektor</span>
+        <button id="btn-inspector-close" class="btn btn-xs btn-ghost" type="button" title="Ukryj inspektor (i)">Ukryj</button>
+      </div>
+      <div id="inspector-body" class="inspector-body"></div>
+    </aside>
+  </main>
+
+  <div id="modal-root"></div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

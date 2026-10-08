@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>simple-hl7, an HL7 gateway tester in one file</title>
+<meta name="description" content="Test HL7 v2 gateways over MLLP: receive and send, check the frame byte by byte, see every event with millisecond timestamps and the gateway's response times. One file, no installation.">
+<link rel="icon" href="img/icon.svg">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/theme.js"></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <img src="img/icon.svg" alt="" loading="lazy" decoding="async">
+    <b>simple-hl7</b>
+    <nav>
+      <a href="#download">Download</a>
+      <a href="#features">Features</a>
+      <a href="#security">Security</a>
+      <a href="../">Other projects</a>
+      <button class="theme" type="button" data-theme-toggle hidden></button>
+    </nav>
+  </div>
+</header>
+
+<div class="hero wrap">
+  <h1>An HL7 gateway tester<br>that is one file</h1>
+  <p class="lead">
+    Receive and send HL7 v2 over MLLP, check every frame byte by byte and see
+    each connection, message and ACK with millisecond timestamps. Made for
+    testing integration gateways at a hospital, on the hospital's own server.
+  </p>
+  <p class="claim">Copy one file to the server, run it, open the browser. That is the whole setup.</p>
+  <img class="banner" src="img/promo.png" alt="simple-hl7 with the listener panels on the left, the live timeline in the middle and a colour-coded ADT^A01 message in the inspector">
+</div>
+
+<div class="downloads wrap" id="download">
+  <h2>Download</h2>
+  <p class="release">
+    Latest release: <span class="badge" id="release-version">checking…</span>
+    <span id="release-date"></span>
+  </p>
+
+  <div class="tiles">
+    <div class="tile">
+      <h3>Windows</h3>
+      <p class="what">
+        One <code>.exe</code> for Windows 10, 11 and Windows Server, no installer
+        and no runtime to install. Put it in a folder of its own: it keeps its
+        configuration, scenarios and logs next to itself.
+      </p>
+      <a class="button" id="download-win" href="#" aria-disabled="true">Download for Windows x64</a>
+      <span class="size" id="size-win"></span>
+    </div>
+
+    <div class="tile">
+      <h3>Linux</h3>
+      <p class="what">
+        One binary for x64 distributions with glibc 2.28 or newer: RHEL, Rocky
+        and Alma 8+, Ubuntu 20.04+, Debian 10+. <code>chmod +x</code>, run, done.
+      </p>
+      <a class="button" id="download-linux" href="#" aria-disabled="true">Download for Linux x64</a>
+      <span class="size" id="size-linux"></span>
+    </div>
+
+    <div class="tile">
+      <h3>Checksums</h3>
+      <p class="what">
+        SHA-256 of the two files above, to check a copy that travelled to a
+        server through several hands.
+      </p>
+      <a class="button" id="download-sums" href="#" aria-disabled="true">Download checksums</a>
+      <span class="size" id="size-sums"></span>
+    </div>
+  </div>
+
+  <p class="note">
+    The files are not signed with a certificate, so Windows SmartScreen shows
+    “Windows protected your PC”. Choose “More info”, then “Run anyway”. Each file
+    is about 85 MB because it carries its own Node.js runtime. The interface is
+    in Polish.
+  </p>
+</div>
+
+<section class="band">
+  <div class="wrap">
+    <h2 id="features">What it does</h2>
+    <p class="intro">
+      Everything a gateway acceptance test needs, in a browser tab served by
+      the program running next to the gateway.
+    </p>
+
+    <!-- Eight cards: two columns keep the rows even. -->
+    <div class="features" style="grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr))">
+      <div class="feature">
+        <h3>Server and client at once</h3>
+        <p>
+          Listeners wait for the gateway on as many ports as you need and answer
+          with AA, AE, AR, no ACK at all or an ACK from your own template, with
+          an optional delay. The client connects to the gateway and sends.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>The frame, checked byte by byte</h3>
+        <p>
+          Prefix and suffix against what you expect, CR or LF between segments,
+          the CR before the suffix, stray control bytes. A wrong suffix shows up
+          after three seconds of silence, without waiting for a disconnect.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Every millisecond on the timeline</h3>
+        <p>
+          Connections, messages and ACKs with millisecond timestamps, and the
+          gateway's response time split into connect, send, first byte and ACK,
+          measured on a monotonic clock. Series of messages give min, average,
+          max and p95.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Messages you can read</h3>
+        <p>
+          Colour-coded segments with field names on hover, a tree with HL7 2.5
+          field names, a hex view with the frame bytes marked, and a check of
+          the encoding against MSH-18: UTF-8, CP1250, ISO-8859-2 and more.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Scenarios you can repeat</h3>
+        <p>
+          YAML files with send, receive and wait steps and checks on the ACK,
+          fields, frame and timing. Nine ready ones, from “does the gateway
+          answer at all” to an order sent out and its result coming back.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Proof for the report</h3>
+        <p>
+          Export the timeline as CSV for a table of response times, or as NDJSON
+          with every byte. The full history also goes to a log file next to the
+          program.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>One file, no installation</h3>
+        <p>
+          No Docker, no Node.js, no installer. On first start the program writes
+          its configuration, scenarios and example messages next to itself.
+          Run it from a console or as a service.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>A manual for every screen</h3>
+        <p>
+          Every panel, form and dialog has its own page in the manual, with a
+          screenshot and every field explained.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>How it looks</h2>
+  <p class="intro">
+    One window: what to send and listen on to the left, everything that happened
+    in the middle, the selected event to the right.
+  </p>
+  <div class="shots two">
+    <figure>
+      <img src="img/framing.png" alt="The inspector showing a frame that ended with 0D 0A instead of 1C 0D" loading="lazy" decoding="async">
+      <figcaption>A wrong suffix from the gateway, caught and explained</figcaption>
+    </figure>
+    <figure>
+      <img src="img/hex.png" alt="The hex view of a frame with the prefix and suffix bytes marked" loading="lazy" decoding="async">
+      <figcaption>The frame in hex, prefix and suffix marked</figcaption>
+    </figure>
+  </div>
+  <div class="shots two">
+    <figure>
+      <img src="img/client.png" alt="The result of a send: ACK AA, matching control id and a timing bar" loading="lazy" decoding="async">
+      <figcaption>The gateway's answer and where the time went</figcaption>
+    </figure>
+    <figure>
+      <img src="img/scenarios.png" alt="The scenarios panel with the gateway address and the list of ready scenarios" loading="lazy" decoding="async">
+      <figcaption>Ready scenarios, pointed at the gateway</figcaption>
+    </figure>
+  </div>
+  <figure class="shot-wide">
+    <img src="img/tree.png" alt="The tree view of an ORU^R01 result with segment and field names" loading="lazy" decoding="async">
+    <figcaption>A lab result as a tree, with the field names from HL7 2.5</figcaption>
+  </figure>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2 id="security">Security</h2>
+    <p class="intro">
+      The interface has no password. Anyone who opens it can send HL7 to any
+      address the server reaches and change the listeners, so do not expose it
+      to the internet: limit its port on the firewall, or start the program with
+      <code>--listen 127.0.0.1:8080</code> and reach it through SSH.
+    </p>
+    <div class="features">
+      <div class="feature">
+        <h3>Patient data stays on the server</h3>
+        <p>
+          The log and the exports hold the full messages. Nothing is sent
+          anywhere by the program: no telemetry, no account, no update check.
+          Delete the folder when the tests are over.
+        </p>
+      </div>
+      <div class="feature">
+        <h3>Files you can verify</h3>
+        <p>
+          Every release comes with the SHA-256 of both files, published next to
+          them on this page.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>simple-hl7, MIT licence</span>
+    <span>Windows 10 or 11, Windows Server, Linux x64</span>
+    <a href="../">More projects by Mysttic</a>
+  </div>
+</footer>
+
+<script src="../assets/releases.js"></script>
+<script>
+// The only per-project settings on this page. The suffixes are the release contract that
+// scripts/build-exe.mjs and the release workflow write.
+initDownloads({
+  tagPrefix: 'simple-hl7-v',
+  files: [
+    { id: 'win', match: /-windows-amd64\.exe$/ },
+    { id: 'linux', match: /-linux-amd64$/ },
+    { id: 'sums', match: /-checksums\.txt$/ }
+  ]
+});
+</script>
+</body>
+</html>

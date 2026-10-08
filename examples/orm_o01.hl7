@@ -1,0 +1,8 @@
+# Zlecenie badania (ORM^O01): nowe zlecenie morfologii z HIS do LIS
+MSH|^~\&|HIS|SZPITAL_LODZ|LIS|LAB_CENTRALNE|{{now}}||ORM^O01^ORM_O01|{{controlId}}|P|2.5|||AL|NE|PL|UNICODE UTF-8
+PID|1||78030398765^^^SZPITAL_LODZ^PI~78030398765^^^PESEL^NNPOL||Jaźń^Zażółć^Gęślą||19780303|M|||al. Niepodległości 8^^Poznań^^61-874^PL||+48 61 852 00 00
+PV1|1|I|ODDZ_CHIR^SALA_1^LOZKO_4^SZPITAL_LODZ||||23456^Wiśniewski^Łukasz^^^dr|||CHIR|||||||||V2026-000987
+ORC|NW|ZL-2026-004522^HIS|||||^^^{{now}}^^R||{{now}}|||23456^Wiśniewski^Łukasz^^^dr
+OBR|1|ZL-2026-004522^HIS||58410-2^Morfologia krwi^LN|R||{{now}}|||||||||23456^Wiśniewski^Łukasz^^^dr
+NTE|1|P|Pacjent przyjmuje leki przeciwzakrzepowe.
+DG1|1||K35.8^Ostre zapalenie wyrostka robaczkowego^ICD10|||A

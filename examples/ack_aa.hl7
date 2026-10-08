@@ -1,0 +1,3 @@
+# Potwierdzenie pozytywne (ACK AA): przykładowa odpowiedź bramki; MSA-2 ustaw na MSH-10 odebranej wiadomości
+MSH|^~\&|BRAMKA|LAB_CENTRALNE|HIS|SZPITAL_LODZ|{{now}}||ACK^A01^ACK|{{controlId}}|P|2.5|||NE|NE|PL|UNICODE UTF-8
+MSA|AA|20261007120000001001

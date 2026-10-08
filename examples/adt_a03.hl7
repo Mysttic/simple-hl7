@@ -1,0 +1,5 @@
+# Wypis pacjenta (ADT^A03): zakończenie hospitalizacji, data wypisu w PV1-45
+MSH|^~\&|HIS|SZPITAL_LODZ|BRAMKA|LAB_CENTRALNE|{{now}}||ADT^A03^ADT_A03|{{controlId}}|P|2.5|||AL|NE|PL|UNICODE UTF-8
+EVN|A03|{{now}}||||{{now}}
+PID|1||85010212345^^^SZPITAL_LODZ^PI~85010212345^^^PESEL^NNPOL||Zażółć^Gęślą^Jaźń||19850102|M|||ul. Piotrkowska 104^^Łódź^^90-926^PL||+48 42 638 44 44
+PV1|1|I|ODDZ_WEWN^SALA_3^LOZKO_2^SZPITAL_LODZ||||12345^Kowalski^Jan^^^dr n. med.|||WEWN||||1|||12345^Kowalski^Jan||V2026-000123|||||||||||||||||01|||||||||{{now}}

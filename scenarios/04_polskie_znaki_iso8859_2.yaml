@@ -1,0 +1,17 @@
+name: 04 Polskie znaki (ISO-8859-2)
+description: >-
+  Wysyła przyjęcie z polskimi znakami zakodowane w ISO-8859-2, zgodnie z MSH-18 = 8859/2.
+  Gdy bramka zwraca AE albo w jej logu lub w systemie docelowym widać krzaki zamiast ąęłńóśźż,
+  kodowanie po stronie bramki jest inne. Wtedy zmień encoding na cp1250 albo utf8 i porównaj.
+target:
+  host: 127.0.0.1
+  port: 2575
+  encoding: iso88592
+  ackTimeoutMs: 5000
+steps:
+  - name: ADT^A01 w ISO-8859-2
+    send:
+      file: examples/adt_a01.hl7
+      autoControlId: true
+    expect:
+      ack: { msa1: AA, controlIdMatches: true }

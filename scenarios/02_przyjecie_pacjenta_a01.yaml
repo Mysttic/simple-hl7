@@ -1,0 +1,21 @@
+name: 02 Przyjęcie pacjenta (ADT^A01)
+description: >-
+  Typowe przyjęcie na oddział. Oczekuje ACK AA ze zgodnym MSH-10, w czasie do 1 s
+  i w poprawnej ramce MLLP (0B ... 1C 0D).
+target:
+  host: 127.0.0.1
+  port: 2575
+  ackTimeoutMs: 5000
+steps:
+  - name: Wyślij ADT^A01
+    send:
+      file: examples/adt_a01.hl7
+      autoControlId: true
+    expect:
+      ack:
+        msa1: AA
+        controlIdMatches: true
+        maxAckMs: 1000
+      framing:
+        prefixOk: true
+        suffixOk: true

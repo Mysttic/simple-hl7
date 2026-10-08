@@ -1,0 +1,21 @@
+name: 01 Czy bramka odpowiada
+description: >-
+  Pierwszy test po podłączeniu. Wysyła jedną wiadomość ADT^A08 i sprawdza, że bramka odsyła
+  jakikolwiek ACK w ciągu 3 s, w poprawnej ramce MLLP i z MSA-2 równym wysłanemu MSH-10.
+  Nie sprawdza, czy bramka wiadomość zaakceptowała (AA), tylko czy w ogóle rozmawia.
+target:
+  host: 127.0.0.1
+  port: 2575
+  ackTimeoutMs: 3000
+steps:
+  - name: Wyślij ADT^A08 i czekaj na dowolny ACK
+    send:
+      file: examples/adt_a08.hl7
+      autoControlId: true
+    expect:
+      ack:
+        msa1: [AA, AE, AR, CA, CE, CR]
+        controlIdMatches: true
+      framing:
+        prefixOk: true
+        suffixOk: true

@@ -1,0 +1,44 @@
+name: 03 Hospitalizacja jednego pacjenta (A01, A08, A03)
+description: >-
+  Przyjęcie, zmiana danych i wypis tego samego pacjenta, w tej kolejności. Dane pacjenta są
+  w sekcji vars, więc można je zmienić w jednym miejscu. Każdy krok oczekuje AA w czasie do 1 s.
+target:
+  host: 127.0.0.1
+  port: 2575
+  ackTimeoutMs: 5000
+vars:
+  pesel: "85010212345"
+  nazwisko: "Nowak"
+  imie: "Anna"
+  wizyta: "V2026-000500"
+steps:
+  - name: Przyjęcie (A01)
+    send:
+      autoControlId: true
+      message: |
+        MSH|^~\&|HIS|SZPITAL|BRAMKA|LAB|{{now}}||ADT^A01^ADT_A01|{{controlId}}|P|2.5
+        EVN|A01|{{now}}
+        PID|1||{{vars.pesel}}^^^SZPITAL^PI||{{vars.nazwisko}}^{{vars.imie}}||19850102|F
+        PV1|1|I|ODDZ_WEWN^SALA_1^LOZKO_1||||||||||||||||{{vars.wizyta}}
+    expect:
+      ack: { msa1: AA, controlIdMatches: true, maxAckMs: 1000 }
+  - name: Zmiana danych (A08), nowy numer telefonu
+    send:
+      autoControlId: true
+      message: |
+        MSH|^~\&|HIS|SZPITAL|BRAMKA|LAB|{{now}}||ADT^A08^ADT_A01|{{controlId}}|P|2.5
+        EVN|A08|{{now}}
+        PID|1||{{vars.pesel}}^^^SZPITAL^PI||{{vars.nazwisko}}^{{vars.imie}}||19850102|F|||||+48 600 100 200
+        PV1|1|I|ODDZ_WEWN^SALA_1^LOZKO_1||||||||||||||||{{vars.wizyta}}
+    expect:
+      ack: { msa1: AA, controlIdMatches: true, maxAckMs: 1000 }
+  - name: Wypis (A03)
+    send:
+      autoControlId: true
+      message: |
+        MSH|^~\&|HIS|SZPITAL|BRAMKA|LAB|{{now}}||ADT^A03^ADT_A03|{{controlId}}|P|2.5
+        EVN|A03|{{now}}
+        PID|1||{{vars.pesel}}^^^SZPITAL^PI||{{vars.nazwisko}}^{{vars.imie}}||19850102|F
+        PV1|1|I|ODDZ_WEWN^SALA_1^LOZKO_1||||||||||||||||{{vars.wizyta}}
+    expect:
+      ack: { msa1: AA, controlIdMatches: true, maxAckMs: 1000 }

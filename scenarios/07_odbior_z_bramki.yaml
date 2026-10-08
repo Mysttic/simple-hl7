@@ -1,0 +1,16 @@
+name: 07 Odbiór wiadomości z bramki
+description: >-
+  Tester jako serwer. Czeka do 2 minut na dowolną wiadomość od bramki na listener "default"
+  i sprawdza ramkę: prefiks 0B, sufiks 1C 0D, segmenty rozdzielone CR, CR przed sufiksem.
+  Uruchom scenariusz, a potem wywołaj wysyłkę po stronie bramki.
+steps:
+  - name: Czekaj na wiadomość od bramki
+    receive:
+      listenerId: default
+      timeoutMs: 120000
+    expect:
+      framing:
+        prefixOk: true
+        suffixOk: true
+        segmentSeparator: CR
+        trailingSeparator: true
