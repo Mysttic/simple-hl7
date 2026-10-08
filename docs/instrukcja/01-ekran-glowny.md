@@ -4,7 +4,7 @@
 
 ![Ekran główny: panele po lewej, oś czasu na środku, inspektor po prawej](img/01-ekran-glowny.png)
 
-Po otwarciu adresu programu w przeglądarce (domyślnie `http://localhost:8080`) widać jeden ekran
+Po otwarciu adresu programu w przeglądarce (domyślnie `http://localhost:7575`) widać jeden ekran
 podzielony na cztery obszary. Wszystko, co dzieje się w testerze, widać od razu, bez odświeżania strony.
 
 ## Obszary ekranu

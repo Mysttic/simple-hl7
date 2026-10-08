@@ -101,10 +101,10 @@ function requireName(value, label) {
 
 function exportFileName(format) {
   const stamp = now().ts.replace(/[-:]/g, '').replace(/\..*$/, '').replace('T', '-');
-  return `hl7t-events-${stamp}.${format}`;
+  return `simple-hl7-events-${stamp}.${format}`;
 }
 
-export function createWebServer(app, { host = '0.0.0.0', port = 8080, staticDir, libDir } = {}) {
+export function createWebServer(app, { host = '0.0.0.0', port = 7575, staticDir, libDir } = {}) {
   if (!app || typeof app.state !== 'function') {
     throw new TypeError('createWebServer: app must be an App instance');
   }
@@ -273,10 +273,23 @@ export function createWebServer(app, { host = '0.0.0.0', port = 8080, staticDir,
     if (overrides !== undefined && overrides !== null && !isPlainObject(overrides)) {
       throw new AppError(400, "'overrides' must be an object");
     }
-    const run = await app.scenarios.run(name, overrides ?? {});
+    const pending = app.scenarios.run(name, overrides ?? {});
+    // from now on the list shows the scenario as running, with its stop button
+    scheduleState();
+    const run = await pending;
     scheduleState();
     res.json(run);
   }));
+
+  api.post('/api/scenarios/:name/stop', (req, res) => {
+    const name = req.params.name;
+    if (typeof name !== 'string' || !name.trim() || name.length > 200 || /[\\/\u0000]/.test(name)) {
+      throw new AppError(400, 'Invalid scenario name');
+    }
+    const result = app.scenarios.stop(name);
+    scheduleState();
+    res.json(result);
+  });
 
   api.get('/api/config', (req, res) => {
     res.json(sanitizeConfig(app.config));

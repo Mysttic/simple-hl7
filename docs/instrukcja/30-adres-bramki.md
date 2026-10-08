@@ -24,6 +24,10 @@ Wartości zapamiętuje przeglądarka. Wpisuje się je raz na początku testów u
 - Wszystkie dołączone scenariusze mają w pliku adres `127.0.0.1:2575`, czyli własny listener testera.
   Przy pustych polach każdy scenariusz działa więc jako autotest bez bramki. Przydaje się to do
   sprawdzenia, co scenariusz robi, zanim uruchomi się go na prawdziwej bramce.
+- Trzy scenariusze zachowują się bez bramki inaczej niż przy niej: `05` kończy się błędem, bo własny
+  listener odpowiada AA na wszystko; `06` czeka na wynik, który trzeba odesłać samemu (w panelu
+  **Klient** wybierz przykład `oru_r01` i wyślij go w ciągu 5 minut); `07` czeka na dowolną wiadomość,
+  np. wysłaną z panelu **Klient**.
 
 ## Błędy
 

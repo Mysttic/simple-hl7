@@ -26,7 +26,7 @@ zwinięte.
 |---|---|
 | Numer i nazwa | kolejność i pole `name` kroku z pliku |
 | Rodzaj | **wysyłka**, **odbiór** albo **pauza** |
-| Status | **OK**, **BŁĄD** (warunek niespełniony), **BŁĄD WYKONANIA** (krok nie mógł się wykonać), **pominięty** (krok nie był wykonywany, bo wcześniejszy się nie udał) |
+| Status | **OK**, **BŁĄD** (warunek niespełniony), **BŁĄD WYKONANIA** (krok nie mógł się wykonać), **ZATRZYMANY** (krok przerwany przyciskiem **Zatrzymaj**), **pominięty** (krok nie był wykonywany, bo wcześniejszy się nie udał) |
 | Czas | ile trwał krok |
 
 Po rozwinięciu krok pokazuje komunikat błędu wykonania (jeśli był), tabelę warunków i linki.

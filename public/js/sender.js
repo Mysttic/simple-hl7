@@ -13,13 +13,16 @@ import { parseAckHex } from './listeners.js';
 const FORM_KEY = 'hl7t.sender.form.v1';
 const MAX_PERSISTED_MESSAGE = 200000;
 
+// On a first start the editor holds a message that can be sent as it is, to the tester's own listener.
+const DEFAULT_MESSAGE = 'MSH|^~\\&|APP|FAC|GW|HOSP|{{now}}||ADT^A01^ADT_A01|{{controlId}}|P|2.5\nEVN|A01|{{now}}\nPID|1||12345^^^HIS^PI||Kowalski^Jan||19800101|M';
+
 const DEFAULTS = {
   host: '127.0.0.1',
   port: 2575,
   prefixHex: '0B',
   suffixHex: '1C0D',
   encoding: 'utf8',
-  message: '',
+  message: DEFAULT_MESSAGE,
   normalizeSegmentSeparator: true,
   autoControlId: false,
   renderTemplate: true,
@@ -92,7 +95,7 @@ export function createSenderPanel({ root, ctx }) {
     autocomplete: 'off',
     autocapitalize: 'off',
     wrap: 'soft',
-    placeholder: 'MSH|^~\\&|APP|FAC|GW|HOSP|{{now}}||ADT^A01^ADT_A01|{{controlId}}|P|2.5\nEVN|A01|{{now}}\nPID|1||12345^^^HIS^PI||Kowalski^Jan||19800101|M',
+    placeholder: 'Wklej wiadomość HL7 albo wybierz przykład z listy powyżej',
     'aria-label': 'Treść wiadomości HL7',
   });
   textarea.value = form.message || '';

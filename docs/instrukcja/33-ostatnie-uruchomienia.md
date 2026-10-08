@@ -10,7 +10,7 @@ Lista pod kafelkami scenariuszy pokazuje wykonane przebiegi, od najnowszego.
 
 | Element | Znaczenie |
 |---|---|
-| Znaczek statusu | **OK** (zielony): wszystkie kroki spełniły warunki. **BŁĄD** (czerwony): co najmniej jeden warunek niespełniony. **BŁĄD WYKONANIA** (czerwony): scenariusza nie dało się wykonać, np. brak pliku z wiadomością, nieistniejący listener |
+| Znaczek statusu | **OK** (zielony): wszystkie kroki spełniły warunki. **BŁĄD** (czerwony): co najmniej jeden warunek niespełniony. **ZATRZYMANY** (żółty): przerwany przyciskiem **Zatrzymaj**. **BŁĄD WYKONANIA** (czerwony): scenariusza nie dało się wykonać, np. brak pliku z wiadomością, nieistniejący listener |
 | Nazwa | nazwa scenariusza; długa nazwa jest skracana |
 | Data i godzina | początek przebiegu z milisekundami |
 | Czas trwania | ile trwał cały przebieg |

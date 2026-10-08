@@ -8,7 +8,7 @@ np. gdy bramka ma wysyłać do niego wiadomości przez kilka dni.
 
 1. Katalog tylko dla testera, z prawem zapisu dla konta, na którym działa (powstaną w nim `config/`,
    `logs/`, `scenarios/`, `examples/`).
-2. Port interfejsu (domyślnie `8080`) otwarty tylko dla komputerów zespołu.
+2. Port interfejsu (domyślnie `7575`) otwarty tylko dla komputerów zespołu.
 3. Porty listenerów (domyślnie `2575`) otwarte dla adresu bramki.
 4. Uzgodnione z klientem, że na serwerze działa narzędzie testowe i że logi zawierają treść wiadomości.
 5. Plan usunięcia programu i logów po testach.
@@ -29,14 +29,14 @@ Nazwa pliku nie ma znaczenia. Krótsza ułatwia zapis w harmonogramie.
 W konsoli administratora. `remoteip` ogranicza dostęp do interfejsu do wskazanych adresów:
 
 ```bat
-netsh advfirewall firewall add rule name="HL7 tester UI" dir=in action=allow protocol=TCP localport=8080 remoteip=10.0.0.0/24
+netsh advfirewall firewall add rule name="simple-hl7 UI" dir=in action=allow protocol=TCP localport=7575 remoteip=10.0.0.0/24
 netsh advfirewall firewall add rule name="HL7 tester MLLP" dir=in action=allow protocol=TCP localport=2575
 ```
 
 Usunięcie reguł po testach:
 
 ```bat
-netsh advfirewall firewall delete rule name="HL7 tester UI"
+netsh advfirewall firewall delete rule name="simple-hl7 UI"
 netsh advfirewall firewall delete rule name="HL7 tester MLLP"
 ```
 
@@ -58,7 +58,7 @@ schtasks /delete /tn "simple-hl7" /f
 ```
 
 Program działa w tle, więc jego komunikaty z konsoli nie są widoczne. Stan sprawdzisz w interfejsie
-albo zapytaniem `curl http://localhost:8080/api/health`. Zdarzenia zapisują się w
+albo zapytaniem `curl http://localhost:7575/api/health`. Zdarzenia zapisują się w
 `C:\simple-hl7\logs\events.ndjson`.
 
 ## Linux (systemd)
@@ -108,11 +108,11 @@ Port poniżej 1024 wymaga dodatkowego uprawnienia. Wybierz port 1024 lub wyższy
 
 ```bash
 # ufw (Ubuntu, Debian)
-sudo ufw allow from 10.0.0.0/24 to any port 8080 proto tcp
+sudo ufw allow from 10.0.0.0/24 to any port 7575 proto tcp
 sudo ufw allow 2575/tcp
 
 # firewalld (RHEL, Rocky, Alma)
-sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.0/24" port port="8080" protocol="tcp" accept'
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.0.0.0/24" port port="7575" protocol="tcp" accept'
 sudo firewall-cmd --permanent --add-port=2575/tcp
 sudo firewall-cmd --reload
 ```
@@ -120,11 +120,11 @@ sudo firewall-cmd --reload
 ## Za reverse proxy
 
 Interfejs korzysta z WebSocket pod `/ws`, więc proxy musi przepuszczać upgrade połączenia. Tester
-słucha wtedy tylko lokalnie (`--listen 127.0.0.1:8080`), a proxy dodaje logowanie i TLS. Nginx:
+słucha wtedy tylko lokalnie (`--listen 127.0.0.1:7575`), a proxy dodaje logowanie i TLS. Nginx:
 
 ```nginx
 location / {
-    proxy_pass http://127.0.0.1:8080;
+    proxy_pass http://127.0.0.1:7575;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";

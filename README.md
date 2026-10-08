@@ -48,13 +48,13 @@ Istniejące pliki nigdy nie są nadpisywane. Nowa wersja programu wgrana do tego
 korzysta ze starej konfiguracji i scenariuszy.
 
 Po starcie konsola pokazuje adresy interfejsu. Przy uruchomieniu z konsoli lub dwuklikiem program
-otwiera przeglądarkę pod `http://localhost:8080`. Z innego komputera wejdź na
-`http://<adres-serwera>:8080`. Domyślny listener `default` nasłuchuje na `0.0.0.0:2575`.
+otwiera przeglądarkę pod `http://localhost:7575`. Z innego komputera wejdź na
+`http://<adres-serwera>:7575`. Domyślny listener `default` nasłuchuje na `0.0.0.0:2575`.
 
 Flagi:
 
 ```
---listen <host:port>   adres interfejsu (domyślnie z config/app.json: 0.0.0.0:8080);
+--listen <host:port>   adres interfejsu (domyślnie z config/app.json: 0.0.0.0:7575);
                        sam port (--listen 9090) zostawia host z konfiguracji
 --config <plik>        inny plik konfiguracji (domyślnie config/app.json obok programu)
 --no-browser           nie otwieraj przeglądarki
@@ -78,7 +78,7 @@ z laboratorium dalej. Sprawdzamy oba kierunki.
 2. **Otwórz porty**, jeśli interfejs lub bramka łączą się z innej maszyny. Na Windows w konsoli administratora:
 
    ```bat
-   netsh advfirewall firewall add rule name="HL7 tester UI" dir=in action=allow protocol=TCP localport=8080
+   netsh advfirewall firewall add rule name="simple-hl7 UI" dir=in action=allow protocol=TCP localport=7575
    netsh advfirewall firewall add rule name="HL7 tester MLLP" dir=in action=allow protocol=TCP localport=2575
    ```
 
@@ -163,6 +163,10 @@ jej pola, odczekaj. Panel **Scenariusze** ma pola **Host** i **Port** bramki, kt
 z pliku, więc tych samych plików używa się u każdego klienta bez edycji. Puste pola oznaczają adres
 z pliku, czyli domyślnie własny listener testera. Dzięki temu każdy scenariusz można uruchomić
 od razu, bez bramki, i zobaczyć, jak działa.
+Trzy scenariusze zachowują się bez bramki inaczej niż przy niej: `05` kończy się błędem, bo własny
+listener odpowiada AA na wszystko; `06` czeka na wynik, który trzeba odesłać samemu (w panelu
+**Klient** wybierz przykład `oru_r01` i wyślij go w ciągu 5 minut); `07` czeka na dowolną wiadomość,
+np. wysłaną z panelu **Klient**. Uruchomiony scenariusz przerywa przycisk **Zatrzymaj** na jego kafelku.
 
 | Scenariusz | Co sprawdza |
 |---|---|
@@ -252,7 +256,8 @@ panelu Klient) i **Podgląd ACK** (jaki ACK powstałby dla wybranego kodu, bez w
 ## Dane, eksport i konfiguracja
 
 - **Eksport** w górnym pasku zapisuje zdarzenia z bieżącymi filtrami jako CSV (`id, ts, source,
-  endpointId, connId, type, direction, level, summary, latencyMs`) albo NDJSON z pełną treścią.
+  endpointId, connId, type, direction, level, summary, latencyMs`; średnik, przecinek dziesiętny i UTF-8
+  z BOM, więc polski Excel otwiera go dwuklikiem w kolumnach) albo NDJSON z pełną treścią.
 - W pamięci jest ostatnie 5000 zdarzeń (`events.maxEvents`). Wszystkie trafiają też do
   `logs/events.ndjson` (`events.ndjsonPath`, `null` wyłącza). Plik rośnie bez limitu: usuwaj go
   po zakończeniu testów.
@@ -268,7 +273,7 @@ panelu Klient) i **Podgląd ACK** (jaki ACK powstałby dla wybranego kodu, bez w
 bramka. Listener dostaje stan błędu, reszta programu działa. Znajdź proces: `netstat -ano | findstr :2575`
 (Windows) albo `ss -ltnp | grep 2575` (Linux), potem zmień port w karcie listenera.
 
-**`UI port 8080 is already in use`.** Uruchom z innym portem: `--listen 0.0.0.0:8090`.
+**`UI port 7575 is already in use`.** Uruchom z innym portem: `--listen 0.0.0.0:8090`.
 
 **Bramka nie łączy się z listenerem.** Listener musi mieć stan `nasłuchuje` i host `0.0.0.0`, a firewall
 serwera musi przepuszczać port. Test z maszyny bramki: `Test-NetConnection <serwer> -Port 2575`
@@ -288,8 +293,8 @@ WebSocket. Program łączy się ponownie sam i dociąga zaległe zdarzenia.
 
 - Interfejs nie ma logowania. Każdy, kto go otworzy, może wysyłać HL7 na dowolny adres osiągalny
   z serwera i zmieniać listenery. Nie wystawiaj go do internetu.
-- Gdy interfejs nie jest potrzebny z sieci, uruchom z `--listen 127.0.0.1:8080` i korzystaj z niego
-  na serwerze albo przez tunel SSH. W przeciwnym razie ogranicz port 8080 na firewallu do adresów
+- Gdy interfejs nie jest potrzebny z sieci, uruchom z `--listen 127.0.0.1:7575` i korzystaj z niego
+  na serwerze albo przez tunel SSH. W przeciwnym razie ogranicz port 7575 na firewallu do adresów
   zespołu wdrożeniowego.
 - `logs/events.ndjson` i eksporty zawierają pełną treść wiadomości, czyli dane pacjentów. Testuj na
   danych testowych, gdy to możliwe. Po testach usuń logi z serwera klienta i nie przekazuj ich poza

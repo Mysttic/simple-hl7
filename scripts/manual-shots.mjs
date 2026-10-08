@@ -73,12 +73,12 @@ function busyPort(port) {
 async function traffic(api) {
   const target = { host: '127.0.0.1', port: LISTENER_PORT, ackTimeoutMs: 5000 };
   await api('PUT', '/api/listeners/default', { encoding: 'iso88592', ack: { mode: 'AA', delayMs: 40 } });
-  await api('POST', '/api/scenarios/02_przyjecie_pacjenta_a01/run', { overrides: { target: { ...target, encoding: 'iso88592' } } });
+  await api('POST', '/api/scenarios/04_polskie_znaki_iso8859_2/run', { overrides: { target } });
   await api('POST', '/api/scenarios/03_hospitalizacja_a01_a08_a03/run', { overrides: { target } });
   await api('POST', '/api/scenarios/09_zly_sufiks/run', { overrides: { target: { ...target, ackTimeoutMs: 1500 } } });
   const loop = api('POST', '/api/scenarios/06_zlecenie_i_wynik/run', { overrides: { target } });
   await sleep(300);
-  await api('POST', '/api/send', { ...target, message: example('oru_r01.hl7').replace('90120567890', '78030398765').replace(/ZL-2026-004521/g, 'ZL-2026-004522'), autoControlId: true });
+  await api('POST', '/api/send', { ...target, message: example('oru_r01.hl7'), autoControlId: true });
   await loop;
   // 05 expects AE / AR, the listener answers AA: a failed run with assertions to show
   await api('POST', '/api/scenarios/05_bledna_wiadomosc/run', { overrides: { target } });
@@ -155,7 +155,7 @@ run(async () => {
   console.log('capturing');
   await page.goto(`${base}/`);
   await page.eval(`localStorage.setItem('hl7t.sender.form.v1', ${JSON.stringify(JSON.stringify({
-    host: '127.0.0.1', port: LISTENER_PORT, encoding: 'iso88592', autoControlId: true, message: example('adt_a01.hl7'),
+    host: '127.0.0.1', port: LISTENER_PORT, encoding: 'iso88592', autoControlId: true, message: example('adt_a01.hl7').replace('UNICODE UTF-8', '8859/2'),
   }))})`);
   await page.goto(`${base}/`);
   await page.until(`document.querySelectorAll('#timeline tr.ev').length > 20`, 'the timeline');

@@ -22,6 +22,7 @@ const SEND_NUMBER_KEYS = ['port', 'connectTimeoutMs', 'ackTimeoutMs', 'repeat', 
 const TARGET_KEYS = new Set([...SEND_STRING_KEYS, ...SEND_BOOL_KEYS, ...SEND_NUMBER_KEYS]);
 const MAX_WAIT_MS = 10 * 60 * 1000;
 const MAX_RUNS = 50;
+export const STOPPED_MESSAGE = 'Stopped by the user';
 
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -399,8 +400,18 @@ function receiveAssertions(expect, event, vars) {
   return out;
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+/** Waits ms, or less when the signal aborts. */
+function sleep(ms, signal = null) {
+  return new Promise((resolve) => {
+    if (signal?.aborted) return resolve();
+    const done = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', done);
+      resolve();
+    };
+    const timer = setTimeout(done, ms);
+    signal?.addEventListener('abort', done, { once: true });
+  });
 }
 
 function renderMatch(match, vars) {
@@ -423,14 +434,14 @@ function pushScenarioEvent(app, type, runId, level, summary, data) {
 async function executeStep(step, ctx) {
   const { app, target, vars } = ctx;
   if (step.kind === 'wait') {
-    await sleep(step.wait.ms);
+    await sleep(step.wait.ms, ctx.signal);
     return { status: 'passed', assertions: [], result: null };
   }
   if (step.kind === 'send') {
     const { file, message, ...sendOpts } = step.send;
     const text = substituteVars(file !== undefined ? readMessageFile(file, ctx.rootDir) : message, vars);
     const req = { ...target, ...sendOpts, message: text };
-    const sent = await app.send(req);
+    const sent = await app.send(req, { signal: ctx.signal });
     const results = Array.isArray(sent?.results) ? sent.results : [];
     if (results.length === 0) {
       return { status: 'error', assertions: [], result: sent ?? null, error: 'sender returned no results' };
@@ -446,9 +457,10 @@ async function executeStep(step, ctx) {
   let event;
   try {
     // messages received since the scenario started count, each one is used by one receive step only
-    event = await app.waitForMessage(listenerId, { timeoutMs, match: renderMatch(match, vars), sinceId: ctx.receiveSinceId });
+    event = await app.waitForMessage(listenerId, { timeoutMs, match: renderMatch(match, vars), sinceId: ctx.receiveSinceId, signal: ctx.signal });
     ctx.receiveSinceId = event.id;
   } catch (err) {
+    if (ctx.signal?.aborted) return { status: 'stopped', assertions: [], result: null, error: STOPPED_MESSAGE };
     if (err && Number.isInteger(err.status) && err.status === 404) {
       return { status: 'error', assertions: [], result: null, error: err.message };
     }
@@ -500,7 +512,11 @@ function applyOverrides(scenario, overrides) {
  * Runs a parsed scenario against an App. Never rejects for step failures: every step problem is
  * recorded in the returned ScenarioRun. Rejects only for invalid arguments.
  */
-export async function runScenario(scenario, app, { overrides } = {}) {
+/**
+ * `signal` (an AbortSignal) stops the run: a wait or receive step ends at once, a series of sends
+ * after the message in flight, the remaining steps are skipped and the run ends as `stopped`.
+ */
+export async function runScenario(scenario, app, { overrides, signal = null } = {}) {
   if (!isPlainObject(scenario) || !Array.isArray(scenario.steps)) {
     throw new Error('runScenario: scenario must be a parsed scenario object');
   }
@@ -515,6 +531,7 @@ export async function runScenario(scenario, app, { overrides } = {}) {
     target: effective.target,
     vars: effective.vars,
     rootDir: app.rootDir ?? process.cwd(),
+    signal,
     receiveSinceId: app.events.stats().lastId ?? 0,
   };
   const run = {
@@ -533,9 +550,14 @@ export async function runScenario(scenario, app, { overrides } = {}) {
     { runId, name: effective.name, stepCount: effective.steps.length });
 
   let stop = false;
+  let stopped = false;
   for (const step of effective.steps) {
     const t0 = now().mono;
     const record = { index: step.index, name: step.name, kind: step.kind, status: 'skipped', durationMs: 0, assertions: [], result: null, error: null };
+    if (!stop && signal?.aborted) {
+      stop = true;
+      stopped = true;
+    }
     if (!stop) {
       try {
         const outcome = await executeStep(step, ctx);
@@ -548,10 +570,17 @@ export async function runScenario(scenario, app, { overrides } = {}) {
         record.error = err?.message ?? String(err);
       }
       record.durationMs = round(now().mono - t0);
+      // the step was cut short by the stop request, even if what it managed to check passed
+      if (signal?.aborted) {
+        record.status = 'stopped';
+        record.error = record.error ?? STOPPED_MESSAGE;
+        stopped = true;
+        stop = true;
+      }
       if (record.status !== 'passed' && !effective.continueOnFailure) stop = true;
     }
     run.steps.push(record);
-    const level = record.status === 'passed' || record.status === 'skipped' ? 'info' : 'error';
+    const level = record.status === 'passed' || record.status === 'skipped' ? 'info' : record.status === 'stopped' ? 'warn' : 'error';
     const detail = record.error ? `: ${record.error}` : '';
     pushScenarioEvent(app, 'scenario.step', runId, level,
       `Step ${step.index + 1}/${effective.steps.length} '${step.name}' ${record.status} in ${record.durationMs} ms${detail}`,
@@ -564,9 +593,9 @@ export async function runScenario(scenario, app, { overrides } = {}) {
   const passed = run.steps.filter((s) => s.status === 'passed').length;
   const failed = run.steps.filter((s) => s.status === 'failed').length;
   const errored = run.steps.filter((s) => s.status === 'error').length;
-  run.status = errored > 0 ? 'error' : (failed > 0 || passed < run.steps.length ? 'failed' : 'passed');
+  run.status = stopped ? 'stopped' : errored > 0 ? 'error' : (failed > 0 || passed < run.steps.length ? 'failed' : 'passed');
 
-  pushScenarioEvent(app, 'scenario.end', runId, run.status === 'passed' ? 'info' : 'error',
+  pushScenarioEvent(app, 'scenario.end', runId, run.status === 'passed' ? 'info' : run.status === 'stopped' ? 'warn' : 'error',
     `Scenario '${effective.name}' ${run.status}: ${passed} passed, ${failed} failed${errored ? `, ${errored} errors` : ''} in ${run.durationMs} ms`,
     { runId, status: run.status, durationMs: run.durationMs, passed, failed });
   return run;

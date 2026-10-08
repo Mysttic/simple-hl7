@@ -12,7 +12,7 @@ const HELP = `simple-hl7 ${VERSION}
 
 Usage: simple-hl7 [flags]
 
-  --listen <host:port>  UI address (default from config: 0.0.0.0:8080).
+  --listen <host:port>  UI address (default from config: 0.0.0.0:7575).
                         A bare port (--listen 9090) keeps the configured host.
   --config <file>       configuration file (default: config/app.json next to the program)
   --no-browser          do not open the browser on start
@@ -61,7 +61,7 @@ function parseArgs(argv) {
   return out;
 }
 
-/** '0.0.0.0:8080' -> { host, port }, '9090' -> { port }, '[::1]:8080' -> { host: '::1', port } */
+/** '0.0.0.0:7575' -> { host, port }, '9090' -> { port }, '[::1]:7575' -> { host: '::1', port } */
 function parseListen(text) {
   const m = /^(?:\[([^\]]+)\]|([^:]*)):(\d+)$/.exec(text) || /^()()(\d+)$/.exec(text);
   if (!m) fail(`Invalid --listen value: ${text} (expected host:port or port)`);

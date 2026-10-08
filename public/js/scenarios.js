@@ -2,7 +2,7 @@
 // assertions table and links to the related events.
 
 import { renderAssertions } from './inspector.js';
-import { el, clear, badge, formatMs, formatDateTime, statusLabel, pluralPl, inputEl, formField } from './format.js';
+import { el, clear, badge, formatMs, formatDateTime, statusLabel, pluralPl, inputEl, formField, errorPl } from './format.js';
 
 const KIND_LABELS = { send: 'wysyłka', receive: 'odbiór', wait: 'pauza' };
 const MAX_RUNS = 30;
@@ -28,6 +28,7 @@ function statusClass(status) {
     case 'passed': return 'ok';
     case 'skipped': return 'dim';
     case 'running': return 'info';
+    case 'stopped': return 'warn';
     default: return 'bad';
   }
 }
@@ -36,6 +37,7 @@ export function createScenariosPanel({ root, ctx }) {
   let available = [];
   let runs = [];
   const running = new Set();
+  const stopping = new Set();
   let lastAvailableKey = '';
   let lastRunsKey = '';
   let selectedRunId = null;
@@ -93,7 +95,11 @@ export function createScenariosPanel({ root, ctx }) {
       return;
     }
     for (const info of available) {
-      const isRunning = running.has(scenarioKey(info));
+      const key = scenarioKey(info);
+      // running here, or on the server (started before this page was opened)
+      const isRunning = running.has(key) || info.running === true;
+      if (!isRunning) stopping.delete(key);
+      const isStopping = stopping.has(key);
       const item = el('div', { class: `scenario-item ${info.error ? 'broken' : ''} ${isRunning ? 'running' : ''}`.trim() });
       item.append(el('div', { class: 'scenario-main' },
         el('div', { class: 'scenario-name' }, info.name || info.file),
@@ -103,13 +109,21 @@ export function createScenariosPanel({ root, ctx }) {
           info.file ? ` · ${info.file}` : ''),
         info.error ? el('div', { class: 'scenario-error' }, `Błąd YAML: ${info.error}`) : null,
       ));
-      item.append(el('button', {
-        class: 'btn btn-sm btn-primary',
-        type: 'button',
-        disabled: info.error || isRunning ? true : null,
-        title: info.error ? 'Scenariusz ma błąd i nie może być uruchomiony' : 'Uruchom scenariusz (serwer czeka na zakończenie)',
-        onClick: () => run(info),
-      }, isRunning ? 'Trwa...' : 'Uruchom'));
+      item.append(isRunning
+        ? el('button', {
+          class: 'btn btn-sm btn-danger',
+          type: 'button',
+          disabled: isStopping ? true : null,
+          title: 'Zatrzymaj scenariusz: czekanie kończy się od razu, seria wysyłek po wiadomości w drodze, pozostałe kroki są pomijane',
+          onClick: () => stop(info),
+        }, isStopping ? 'Zatrzymuję...' : 'Zatrzymaj')
+        : el('button', {
+          class: 'btn btn-sm btn-primary',
+          type: 'button',
+          disabled: info.error ? true : null,
+          title: info.error ? 'Scenariusz ma błąd i nie może być uruchomiony' : 'Uruchom scenariusz (serwer czeka na zakończenie)',
+          onClick: () => run(info),
+        }, 'Uruchom'));
       listEl.append(item);
     }
   }
@@ -195,13 +209,28 @@ export function createScenariosPanel({ root, ctx }) {
       const result = await ctx.api.runScenario(key, targetOverrides());
       addRun(result);
       showRun(result);
-      ctx.notify(`Scenariusz "${info.name}": ${statusLabel(result.status)} w ${formatMs(result.durationMs)}`, result.status === 'passed' ? 'info' : 'error');
+      ctx.notify(`Scenariusz "${info.name}": ${statusLabel(result.status)} w ${formatMs(result.durationMs)}`, result.status === 'passed' || result.status === 'stopped' ? 'info' : 'error');
     } catch (err) {
       ctx.notify(`Scenariusz "${info.name}": ${err.message}`, 'error');
     } finally {
       running.delete(key);
+      stopping.delete(key);
       renderList();
       ctx.refreshState();
+    }
+  }
+
+  async function stop(info) {
+    const key = scenarioKey(info);
+    if (!key || stopping.has(key)) return;
+    stopping.add(key);
+    renderList();
+    try {
+      await ctx.api.stopScenario(key);
+    } catch (err) {
+      stopping.delete(key);
+      renderList();
+      ctx.notify(`Scenariusz "${info.name || key}": ${err.message}`, 'error');
     }
   }
 
@@ -239,7 +268,7 @@ export function createScenariosPanel({ root, ctx }) {
       ' ',
       el('span', { class: 'mono dim small' }, Number.isFinite(step.durationMs) ? formatMs(step.durationMs) : '')));
     const body = el('div', { class: 'step-body' });
-    if (step.error) body.append(el('div', { class: 'text-error' }, String(step.error)));
+    if (step.error) body.append(el('div', { class: 'text-error' }, errorPl(String(step.error))));
     body.append(renderAssertions(step.assertions));
     const links = stepLinks(step);
     if (links.length) body.append(el('div', { class: 'result-links' }, ...links));

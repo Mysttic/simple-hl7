@@ -7,7 +7,7 @@ import { DEFAULT_SEND_REQUEST } from './mllp/sender.js';
 const { message: _omittedMessage, ...SENDER_DEFAULTS } = DEFAULT_SEND_REQUEST;
 
 export const DEFAULT_CONFIG = {
-  web: { host: '0.0.0.0', port: 8080 },
+  web: { host: '0.0.0.0', port: 7575 },
   events: { maxEvents: 5000, ndjsonPath: 'logs/events.ndjson' },
   listeners: [structuredClone(DEFAULT_LISTENER_CONFIG)],
   senderDefaults: structuredClone(SENDER_DEFAULTS),

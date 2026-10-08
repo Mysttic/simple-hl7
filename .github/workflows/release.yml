@@ -203,6 +203,16 @@ jobs:
             echo "::error::Needs a personal token with Contents: read and write on $HUB."
             exit 1
           fi
+          # A mistyped, expired or revoked token answers 401. Said here in plain words, before
+          # anything on the site changes, instead of gh's "Try authenticating with gh auth login".
+          status=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $HUB_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$HUB")
+          if [ "$status" != "200" ]; then
+            echo "::error::GitHub answered $status to HUB_TOKEN (401: the token is wrong, expired or revoked). Release $TAG was made, the copy to the site was not."
+            echo "::error::Set the secret again (gh secret set HUB_TOKEN), then use Re-run failed jobs on this run."
+            exit 1
+          fi
 
       - name: Files from the release
         env:
