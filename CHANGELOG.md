@@ -7,6 +7,16 @@ ostatniego wydanego tagu.
 
 ## [Unreleased]
 
+### Zmienione
+
+- README przedstawia program po angielsku, z opisem ze strony projektu na hubie. Szczegóły działania
+  są w [docs/PRZEWODNIK.md](docs/PRZEWODNIK.md), a budowanie, testy i wydania w
+  [docs/ROZWOJ.md](docs/ROZWOJ.md).
+
+### Usunięte
+
+- Katalog `site/` z kopią strony projektu dla huba. Strona na hubie ma własną kopię w Mysttic/Mysttic.
+
 ## [1.0.0] - 2026-11-05
 
 Pierwsze oficjalne wydanie publiczne.

@@ -2,7 +2,7 @@
 # only when VERSION.md is above the newest v* tag; otherwise every job after "Version" is skipped.
 # Then the same files are copied to Mysttic/Mysttic, the public site, under the tag
 # simple-hl7-v<version>, and this project's older releases there are removed. Needs the HUB_TOKEN
-# secret (see README, "Wydania").
+# secret (see docs/ROZWOJ.md, "Wydania").
 #
 # The full CI suite is not repeated here: the pull request from develop into master ran it on this
 # very tree (see ci.yml). What does run is a short "Tests" job and the smoke test of each built file,

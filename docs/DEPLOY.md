@@ -1,6 +1,6 @@
 # Wdrożenie na serwerze
 
-Do krótkiego testu wystarczy skopiować plik i go uruchomić (README, „Uruchomienie”). Ten dokument
+Do krótkiego testu wystarczy skopiować plik i go uruchomić ([przewodnik, „Uruchomienie”](PRZEWODNIK.md#uruchomienie)). Ten dokument
 opisuje stałą instalację: tester startuje razem z serwerem i działa bez zalogowanego użytkownika,
 np. gdy bramka ma wysyłać do niego wiadomości przez kilka dni.
 
