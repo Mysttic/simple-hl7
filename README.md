@@ -402,3 +402,7 @@ czytelnym błędem. Token ma datę ważności; po jej upływie job `site` zatrzy
 
 Strona projektu na hubie leży gotowa w `site/simple-hl7/`; jak ją podpiąć i odświeżać, opisuje
 [site/README.md](site/README.md).
+
+## Licencja
+
+MIT, pełna treść w pliku [LICENSE](LICENSE).

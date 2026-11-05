@@ -1,5 +1,5 @@
 # Aktualizacja danych pacjenta (ADT^A08): zmiana adresu i telefonu, kodowanie UTF-8
 MSH|^~\&|HIS|SZPITAL_LODZ|BRAMKA|LAB_CENTRALNE|{{now}}||ADT^A08^ADT_A01|{{controlId}}|P|2.5|||AL|NE|PL|UNICODE UTF-8
 EVN|A08|{{now}}||||{{now}}
-PID|1||92110487654^^^SZPITAL_LODZ^PI~92110487654^^^PESEL^NNPOL||Gęślą^Łukasz^Jaźń||19921104|M|||ul. Źródłowa 5A^^Łódź^^91-735^PL||+48 512 345 678||||||92110487654|||||||||||N
+PID|1||92110487654^^^SZPITAL_LODZ^PI~92110487654^^^PESEL^NNPOL||Gęślą^Łukasz^Jaźń||19921104|M|||ul. Źródłowa 5A^^Łódź^^91-735^PL||+48 000 000 005||||||92110487654|||||||||||N
 PV1|1|O|PORADNIA_LEK^GAB_1^^SZPITAL_LODZ||||12345^Kowalski^Jan^^^dr n. med.|||LEK|||||||||V2026-000124

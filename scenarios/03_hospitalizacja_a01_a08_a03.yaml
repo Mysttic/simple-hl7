@@ -28,7 +28,7 @@ steps:
       message: |
         MSH|^~\&|HIS|SZPITAL|BRAMKA|LAB|{{now}}||ADT^A08^ADT_A01|{{controlId}}|P|2.5
         EVN|A08|{{now}}
-        PID|1||{{vars.pesel}}^^^SZPITAL^PI||{{vars.nazwisko}}^{{vars.imie}}||19850102|F|||||+48 600 100 200
+        PID|1||{{vars.pesel}}^^^SZPITAL^PI||{{vars.nazwisko}}^{{vars.imie}}||19850102|F|||||+48 000 000 006
         PV1|1|I|ODDZ_WEWN^SALA_1^LOZKO_1||||||||||||||||{{vars.wizyta}}
     expect:
       ack: { msa1: AA, controlIdMatches: true, maxAckMs: 1000 }
