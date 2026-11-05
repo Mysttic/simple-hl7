@@ -4,7 +4,7 @@ Instrukcja opisuje każdy element interfejsu testera bramek HL7: kafelki, formul
 i widoki inspektora. Każdy element ma osobną podstronę ze zrzutem ekranu i opisem wszystkich pól,
 przycisków i stanów.
 
-Jak zainstalować i uruchomić program, opisuje [README projektu](../../README.md). Składnię plików
+Jak zainstalować i uruchomić program, opisuje [przewodnik](../PRZEWODNIK.md). Składnię plików
 scenariuszy opisuje [docs/SCENARIOS.md](../SCENARIOS.md).
 
 ## Pojęcia używane w instrukcji

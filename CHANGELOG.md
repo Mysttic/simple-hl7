@@ -9,9 +9,13 @@ ostatniego wydanego tagu.
 
 ### Zmienione
 
-- Strona projektu w `site/simple-hl7` jest samodzielna: własne style i skrypt, pobieranie z wydań
-  tego repozytorium i treść skupiona na prezentacji programu. Zastąpi stronę na hubie, gdy
-  repozytorium stanie się publiczne.
+- README przedstawia program po angielsku, z opisem ze strony projektu na hubie. Szczegóły działania
+  są w [docs/PRZEWODNIK.md](docs/PRZEWODNIK.md), a budowanie, testy i wydania w
+  [docs/ROZWOJ.md](docs/ROZWOJ.md).
+
+### Usunięte
+
+- Katalog `site/` z kopią strony projektu dla huba. Strona na hubie ma własną kopię w Mysttic/Mysttic.
 
 ## [1.0.0] - 2026-11-05
 

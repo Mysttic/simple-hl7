@@ -1,6 +1,6 @@
-// Captures the screenshots used by README.md into docs/img/ and copies five of them to the project
-// page in site/simple-hl7/img/. The main screenshot shows the view a new user gets (Prosty), the
-// second one the same moment in the full view; the detail shots are taken in the full view.
+// Captures the screenshots used by README.md and docs/PRZEWODNIK.md into docs/img/. The main
+// screenshot shows the view a new user gets (Prosty), the second one the same moment in the full
+// view; the detail shots are taken in the full view.
 //
 // Starts the app from source with a throwaway config, produces realistic traffic against its own
 // listener (scenarios, a wrong suffix, a loop with a result coming back), drives a headless Edge or
@@ -101,12 +101,5 @@ run(async () => {
   await page.eval(`document.querySelector('#left').scrollTop = 0`);
   await shot('scenariusze.png', { selectors: ['#panel-scenarios'], pad: 0 });
   await shot('scenariusz-wynik.png', { selectors: ['.scenario-details'], pad: 6 });
-
-  // the project page (site/simple-hl7) shows some of the same screenshots under English names
-  const SITE_IMG = path.join(ROOT, 'site', 'simple-hl7', 'img');
-  const SITE_SHOTS = [['glowny.png', 'promo.png'], ['glowny-pelny.png', 'full.png'], ['zly-sufiks.png', 'framing.png'],
-    ['scenariusze.png', 'scenarios.png'], ['klient-wynik.png', 'client.png']];
-  for (const [from, to] of SITE_SHOTS) fs.copyFileSync(path.join(OUT, from), path.join(SITE_IMG, to));
-  console.log(`  site/simple-hl7/img (${SITE_SHOTS.length} files)`);
   console.log('done');
 });
