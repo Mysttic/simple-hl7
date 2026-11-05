@@ -4,6 +4,8 @@
 
 ![Inspektor zdarzenia conn.close: czas trwania połączenia, bajty, liczba wiadomości](img/60-zdarzenie-polaczenia.png)
 
+> Widoki Prosty i Standardowy nie pokazują na osi czasu zdarzeń `conn.open`, `conn.close` i `sender.connect`. Błędy połączeń (`conn.error`, `sender.error`) są w każdym widoku, patrz [Widok interfejsu](08-widok.md).
+
 Zdarzenia bez treści HL7 mają w inspektorze prostszy widok: tytuł, metadane, opis i siatkę pól.
 Nie mają zakładek Czytelny, Drzewo i Hex. Na zrzucie zamknięcie połączenia (`conn.close`).
 

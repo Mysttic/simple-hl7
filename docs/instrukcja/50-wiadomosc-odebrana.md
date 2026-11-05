@@ -4,6 +4,8 @@
 
 ![Inspektor zdarzenia msg.in: dane z nagłówka MSH, znaczki ramki, powiązany ACK, czasy odbioru, przyciski](img/50-wiadomosc-odebrana.png)
 
+> Widoki Prosty i Standardowy ukrywają dodatkowe pola (wersja, czas MSH-7, kodowanie, segmenty, rozmiar) i sekcję **Odbiór**, a Prosty także znaczki ramki, patrz [Widok interfejsu](08-widok.md).
+
 Inspektor to panel po prawej stronie ekranu. Pokazuje szczegóły zdarzenia zaznaczonego na osi czasu.
 Ta strona opisuje górną część inspektora dla wiadomości, którą listener testera odebrał od bramki
 (typ `msg.in`). Pod nią są zakładki z treścią: [Czytelny](52-zakladka-czytelny.md),

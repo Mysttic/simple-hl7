@@ -4,6 +4,8 @@
 
 ![Oś czasu: zdarzenia startu, połączenia, wiadomości i ACK z czasami odpowiedzi](img/40-os-czasu.png)
 
+> Widoki Prosty i Standardowy ukrywają kolumny **Δ** i **Bajty** oraz zdarzenia `conn.open`, `conn.close` i `sender.connect`, a Prosty także kolumnę **Punkt**, patrz [Widok interfejsu](08-widok.md).
+
 Środek ekranu to tabela wszystkich zdarzeń, od najstarszego na górze do najnowszego na dole. Nowe
 zdarzenia dopisują się na bieżąco, a widok sam przewija się w dół (autoprzewijanie, patrz
 [Wstrzymane przewijanie](43-wstrzymane-przewijanie.md)). Kliknięcie wiersza otwiera zdarzenie

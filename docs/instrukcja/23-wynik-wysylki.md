@@ -4,6 +4,8 @@
 
 ![Karta udanej wysyłki: ACK AA, zgodny control id, pasek czasów](img/23-wynik-wysylki.png)
 
+> Widoki Prosty i Standardowy pokazują w wyniku ACK, MSA-1 i MSA-2, a ukrywają ramkę ACK, rozmiar i pasek czasów, patrz [Widok interfejsu](08-widok.md).
+
 Po kliknięciu **Wyślij** pod przyciskami pojawia się karta wyniku. W trakcie wysyłki pokazuje napis
 „Wysyłanie do host:port...”, po zakończeniu wynik pojedynczej wysyłki. Wynik serii opisuje
 [osobna strona](25-wynik-serii.md).

@@ -37,6 +37,47 @@ const DEFAULTS = {
   logBytes: true,
 };
 
+// Fields a view can hide (view.js): the key that hides them and the label used in the form and in the
+// hint about hidden values.
+const FIELDS = {
+  prefixHex: { label: 'Prefix (hex)', view: 'sender.framing' },
+  suffixHex: { label: 'Suffix (hex)', view: 'sender.framing' },
+  ackPrefixHex: { label: 'Prefix ACK (hex)', view: 'sender.ackFraming' },
+  ackSuffixHex: { label: 'Suffix ACK (hex)', view: 'sender.ackFraming' },
+  encoding: { label: 'Kodowanie', view: 'sender.encoding' },
+  ackTimeoutMs: { label: 'Timeout ACK (ms)', view: 'sender.timeouts' },
+  connectTimeoutMs: { label: 'Timeout połączenia (ms)', view: 'sender.timeouts' },
+  repeat: { label: 'Powtórzenia', view: 'sender.series' },
+  intervalMs: { label: 'Odstęp (ms)', view: 'sender.series' },
+  keepAlive: { label: 'Jedno połączenie (keepAlive)', view: 'sender.series' },
+  expectAck: { label: 'Oczekuj ACK', view: 'sender.options' },
+  renderTemplate: { label: 'Szablony {{...}}', view: 'sender.options' },
+  autoControlId: { label: 'Auto MSH-10', view: 'sender.options' },
+  normalizeSegmentSeparator: { label: 'Normalizuj CR', view: 'sender.options' },
+  logBytes: { label: 'Loguj bajty', view: 'sender.options' },
+};
+
+/** The same value for a send: "0b" equals "0B", an empty ACK frame equals null. */
+function sameValue(name, a, b) {
+  if (name === 'prefixHex' || name === 'suffixHex') {
+    const x = parseHexInput(a);
+    const y = parseHexInput(b);
+    return x.ok && y.ok && x.hex === y.hex;
+  }
+  if (name === 'ackPrefixHex' || name === 'ackSuffixHex') {
+    const x = parseAckHex(a);
+    const y = parseAckHex(b);
+    return x.ok && y.ok && x.hex === y.hex;
+  }
+  return a === b;
+}
+
+function shownValue(name, value) {
+  if (typeof value === 'boolean') return value ? 'włączone' : 'wyłączone';
+  if (name === 'encoding') return ENCODING_LABELS[value] || value;
+  return value === '' ? '(puste)' : String(value);
+}
+
 function loadForm() {
   try {
     const raw = localStorage.getItem(FORM_KEY);
@@ -64,6 +105,9 @@ export function createSenderPanel({ root, ctx }) {
   let sending = false;
   let examplesList = [];
   let listenersList = [];
+  // what the form starts from: the built-in defaults, then senderDefaults from the server configuration
+  let baseline = { ...DEFAULTS };
+  let baselineKey = null;
 
   // ---- form inputs -------------------------------------------------------------------
 
@@ -101,33 +145,35 @@ export function createSenderPanel({ root, ctx }) {
   textarea.value = form.message || '';
   const mirror = el('div', { class: 'editor-mirror', 'aria-hidden': 'true' });
   const editor = el('div', { class: 'editor' }, mirror, textarea);
-  const statusLine = el('div', { class: 'editor-status mono dim' });
+  const statusLine = el('div', { class: 'editor-status mono dim', 'data-view': 'sender.status' });
+  const hintEl = el('div', { class: 'view-hint', role: 'status', hidden: true });
   const sendBtn = el('button', { class: 'btn btn-primary', type: 'button', title: 'Wyślij (Ctrl+Enter)' }, 'Wyślij');
-  const previewBtn = el('button', { class: 'btn', type: 'button', title: 'Pokaż wiadomość po renderowaniu szablonu (bez wysyłania)' }, 'Podgląd szablonu');
+  const previewBtn = el('button', { class: 'btn', type: 'button', title: 'Pokaż wiadomość po renderowaniu szablonu (bez wysyłania)', 'data-view': 'sender.preview' }, 'Podgląd szablonu');
   const clearBtn = el('button', { class: 'btn btn-ghost', type: 'button', title: 'Wyczyść treść wiadomości' }, 'Wyczyść');
   const resultEl = el('div', { class: 'sender-result' });
 
+  const field = (name, hint = null, opts = {}) => formField(FIELDS[name].label, f[name], hint, { ...opts, view: FIELDS[name].view });
   root.append(
     el('div', { class: 'form-grid cols-2 compact' },
       formField('Host', f.host),
       formField('Port', f.port),
-      formField('Prefix (hex)', f.prefixHex, '0B = VT. Puste = bez prefiksu.'),
-      formField('Suffix (hex)', f.suffixHex, '1C0D = FS CR. Np. "0D0A" do testu złej ramki.'),
-      formField('Prefix ACK (hex)', f.ackPrefixHex, 'Oczekiwany w ACK. Puste = jak wysyłka, "brak" = bez.'),
-      formField('Suffix ACK (hex)', f.ackSuffixHex, 'Oczekiwany w ACK. Puste = jak wysyłka, "brak" = bez.'),
-      formField('Kodowanie', f.encoding),
-      formField('Timeout ACK (ms)', f.ackTimeoutMs),
-      formField('Timeout połączenia (ms)', f.connectTimeoutMs),
-      formField('Powtórzenia', f.repeat, 'Więcej niż 1 = test obciążeniowy z podsumowaniem.'),
-      formField('Odstęp (ms)', f.intervalMs, 'Przerwa między powtórzeniami.'),
-      formField('Jedno połączenie (keepAlive)', f.keepAlive, 'Wszystkie powtórzenia przez jedno TCP.'),
+      field('prefixHex', '0B = VT. Puste = bez prefiksu.'),
+      field('suffixHex', '1C0D = FS CR. Np. "0D0A" do testu złej ramki.'),
+      field('ackPrefixHex', 'Oczekiwany w ACK. Puste = jak wysyłka, "brak" = bez.'),
+      field('ackSuffixHex', 'Oczekiwany w ACK. Puste = jak wysyłka, "brak" = bez.'),
+      field('encoding'),
+      field('ackTimeoutMs'),
+      field('connectTimeoutMs'),
+      field('repeat', 'Więcej niż 1 = test obciążeniowy z podsumowaniem.'),
+      field('intervalMs', 'Przerwa między powtórzeniami.'),
+      field('keepAlive', 'Wszystkie powtórzenia przez jedno TCP.'),
     ),
-    el('div', { class: 'check-row' },
-      formField('Oczekuj ACK', f.expectAck, null, { class: 'inline' }),
-      formField('Szablony {{...}}', f.renderTemplate, null, { class: 'inline' }),
-      formField('Auto MSH-10', f.autoControlId, null, { class: 'inline' }),
-      formField('Normalizuj CR', f.normalizeSegmentSeparator, null, { class: 'inline' }),
-      formField('Loguj bajty', f.logBytes, null, { class: 'inline' }),
+    el('div', { class: 'check-row', 'data-view': 'sender.options' },
+      field('expectAck', null, { class: 'inline' }),
+      field('renderTemplate', null, { class: 'inline' }),
+      field('autoControlId', null, { class: 'inline' }),
+      field('normalizeSegmentSeparator', null, { class: 'inline' }),
+      field('logBytes', null, { class: 'inline' }),
     ),
     el('div', { class: 'picker-row' },
       el('label', { class: 'picker' }, el('span', { class: 'dim' }, 'Cel:'), targetSel),
@@ -135,6 +181,7 @@ export function createSenderPanel({ root, ctx }) {
     ),
     editor,
     statusLine,
+    hintEl,
     el('div', { class: 'sender-actions' }, sendBtn, previewBtn, clearBtn, el('span', { class: 'dim small' }, 'Ctrl+Enter wysyła')),
     resultEl,
   );
@@ -228,6 +275,7 @@ export function createSenderPanel({ root, ctx }) {
     input.addEventListener('change', () => {
       saveForm();
       updateStatus();
+      updateHint();
     });
   }
 
@@ -251,15 +299,64 @@ export function createSenderPanel({ root, ctx }) {
     if (values.logBytes !== undefined) f.logBytes.checked = !!values.logBytes;
   }
 
-  /** Server senderDefaults are applied only when nothing was persisted locally yet. */
+  /**
+   * Server senderDefaults: the baseline of the hint about hidden values, and the form's values when
+   * nothing was persisted locally yet.
+   */
   function setDefaults(senderDefaults) {
-    if (defaultsApplied || !senderDefaults || typeof senderDefaults !== 'object') return;
+    if (!senderDefaults || typeof senderDefaults !== 'object') return;
+    const key = JSON.stringify(senderDefaults);
+    if (key === baselineKey) return;
+    baselineKey = key;
     const values = { ...senderDefaults };
     delete values.message;
     if (values.ackPrefixHex === null) values.ackPrefixHex = '';
     if (values.ackSuffixHex === null) values.ackSuffixHex = '';
+    baseline = { ...DEFAULTS, ...values };
+    if (!defaultsApplied) {
+      applyValues(values);
+      defaultsApplied = true;
+    }
+    updateHint();
+  }
+
+  // ---- values hidden by the view -----------------------------------------------------------
+
+  /** Fields the view hides whose value differs from the default: every send still uses them. */
+  function hiddenChanges() {
+    if (!ctx.view || ctx.view.isHidden('sender')) return [];
+    const values = readFormValues();
+    return Object.keys(FIELDS).filter((name) => ctx.view.isHidden(FIELDS[name].view) && !sameValue(name, values[name], baseline[name]));
+  }
+
+  function updateHint() {
+    const names = hiddenChanges();
+    clear(hintEl);
+    hintEl.hidden = !names.length;
+    if (!names.length) return;
+    const values = readFormValues();
+    hintEl.append(
+      `Ukryte w tym widoku, inne niż domyślne: ${names.map((name) => `${FIELDS[name].label}: ${shownValue(name, values[name])}`).join(', ')}. `,
+      el('a', {
+        href: '#',
+        class: 'link',
+        title: 'Ustaw ukryte pola na wartości domyślne',
+        onClick: (e) => {
+          e.preventDefault();
+          restoreHidden();
+        },
+      }, 'Przywróć domyślne'),
+    );
+  }
+
+  function restoreHidden() {
+    const values = {};
+    for (const name of hiddenChanges()) values[name] = baseline[name];
     applyValues(values);
-    defaultsApplied = true;
+    saveForm();
+    updateStatus();
+    updateHint();
+    ctx.notify('Ukryte pola klienta mają znowu wartości domyślne', 'info');
   }
 
   // ---- target (local listeners) and examples ---------------------------------------------
@@ -292,6 +389,7 @@ export function createSenderPanel({ root, ctx }) {
       ackSuffixHex: cfg.ack && cfg.ack.suffixHex !== null && cfg.ack.suffixHex !== undefined ? cfg.ack.suffixHex : '',
     });
     saveForm();
+    updateHint();
     targetSel.value = '';
     ctx.notify(`Wypełniono cel na podstawie nasłuchu ${l.id}`, 'info');
   });
@@ -427,7 +525,15 @@ export function createSenderPanel({ root, ctx }) {
     } else {
       editor.classList.remove('has-error');
     }
-    if (!ok) return null;
+    if (!ok) {
+      // an error in a field the view hides would stay out of sight
+      const hiddenErrors = Object.keys(FIELDS).filter((name) => ctx.view && ctx.view.isHidden(FIELDS[name].view)
+        && f[name].closest('.form-field')?.classList.contains('has-error'));
+      if (hiddenErrors.length) {
+        ctx.notify(`Pole ukryte w tym widoku ma błędną wartość: ${hiddenErrors.map((name) => FIELDS[name].label).join(', ')}. Użyj „Przywróć domyślne” albo zmień widok.`, 'error');
+      }
+      return null;
+    }
     return {
       host: values.host,
       port: values.port,
@@ -515,13 +621,15 @@ export function createSenderPanel({ root, ctx }) {
       grid.append(kv('Ramkowanie ACK', [
         badge(v.framingOk ? 'OK' : 'BŁĄD', v.framingOk ? 'ok' : 'bad'),
         ack.framing && !v.framingOk ? el('span', { class: 'dim mono' }, ` prefix ${hexOrNone(ack.framing.prefixHexActual)} / suffix ${hexOrNone(ack.framing.suffixHexActual)}`) : null,
-      ]));
+      ], { view: 'sender.details' }));
     }
-    grid.append(kv('Wysłano', `${formatBytes(r.sentHex ? r.sentHex.length / 2 : 0)} ramka`));
+    grid.append(kv('Wysłano', `${formatBytes(r.sentHex ? r.sentHex.length / 2 : 0)} ramka`, { view: 'sender.details' }));
     card.append(grid);
 
     if (t && (Number.isFinite(t.connectMs) || Number.isFinite(t.ackMs) || Number.isFinite(t.totalMs))) {
-      card.append(renderTimingsBar(t, ctx.settings));
+      const bar = renderTimingsBar(t, ctx.settings);
+      bar.dataset.view = 'sender.details';
+      card.append(bar);
     }
     if (v && Array.isArray(v.problems) && v.problems.length) {
       card.append(el('ul', { class: 'insp-problems' }, ...v.problems.map((p) => el('li', {}, messagePl(p)))));
@@ -607,11 +715,14 @@ export function createSenderPanel({ root, ctx }) {
 
   updateMirror();
   loadExamples();
+  updateHint();
 
   return {
     loadMessage,
     setDefaults,
     setListeners,
+    /** The hint about hidden values follows the current view. */
+    applyView: updateHint,
     reloadExamples: loadExamples,
     focus: () => textarea.focus(),
     isSending: () => sending,

@@ -25,6 +25,7 @@ const PAGES = [
   { group: 'Ogólne', slug: '05-czyszczenie-zdarzen', title: 'Czyszczenie zdarzeń', shows: 'Okno potwierdzenia po kliknięciu Wyczyść.' },
   { group: 'Ogólne', slug: '06-brak-polaczenia', title: 'Brak połączenia z serwerem', shows: 'Czerwony pasek, gdy przeglądarka straciła połączenie z programem.' },
   { group: 'Ogólne', slug: '07-powiadomienia', title: 'Powiadomienia', shows: 'Komunikaty w prawym dolnym rogu ekranu: informacja (niebieski) i błąd (czerwony).' },
+  { group: 'Ogólne', slug: '08-widok', title: 'Widok interfejsu', shows: 'Ekran w widoku Prosty oraz sekcja Widok interfejsu w oknie Ustawienia.', images: ['08-widok-prosty', '08-widok-ustawienia'] },
   { group: 'Serwer', slug: '10-kafelek-serwera', title: 'Kafelek serwera', shows: 'Karta działającego listenera: adres, ramka, kodowanie, ACK, liczniki, czasy, przyciski.' },
   { group: 'Serwer', slug: '11-stany-serwera', title: 'Stany kafelka serwera', shows: 'Listener zatrzymany oraz listener z błędem (port zajęty).' },
   { group: 'Serwer', slug: '12-formularz-serwera', title: 'Formularz serwera: dodawanie', shows: 'Okno „Dodaj” z wartościami domyślnymi, wszystkie sekcje.' },
@@ -152,11 +153,23 @@ run(async () => {
     await sleep(100);
   };
 
+  // the view switch in the top bar (public/js/view.js)
+  const setView = async (preset) => {
+    await page.eval(`(() => {
+      const s = document.getElementById('view-select');
+      s.value = ${JSON.stringify(preset)};
+      s.dispatchEvent(new Event('change'));
+    })()`);
+    await sleep(300);
+  };
+
   console.log('capturing');
   await page.goto(`${base}/`);
   await page.eval(`localStorage.setItem('hl7t.sender.form.v1', ${JSON.stringify(JSON.stringify({
     host: '127.0.0.1', port: LISTENER_PORT, encoding: 'iso88592', autoControlId: true, message: example('adt_a01.hl7').replace('UNICODE UTF-8', '8859/2'),
   }))})`);
+  // the manual describes every element, so it is shot in the full view (a new browser starts in Prosty)
+  await page.eval(`localStorage.setItem('hl7t.ui.settings.v1', ${JSON.stringify(JSON.stringify({ view: { preset: 'full', custom: null } }))})`);
   await page.goto(`${base}/`);
   await page.until(`document.querySelectorAll('#timeline tr.ev').length > 20`, 'the timeline');
   await page.until(`document.querySelector('.listener-card[data-id="zajety"]')`, 'the listener cards');
@@ -180,6 +193,9 @@ run(async () => {
   // ---- general (normal window) ----
   await select(adt.id);
   await shot('01-ekran-glowny');
+  await setView('simple');
+  await shot('08-widok-prosty');
+  await setView('full');
 
   // everything else: tall window so long panels fit, double pixel density for sharp crops
   await page.resize(1920, 2400, 2);
@@ -191,6 +207,10 @@ run(async () => {
   await page.click('#btn-export');
   await page.click('#btn-settings');
   await shot('04-okno-ustawien', { selectors: ['.modal'], pad: 0 });
+  // the view section with Standardowy picked (the window previews it; closing without Zapisz restores Pełny)
+  await page.eval(`(() => { const s = document.querySelector('.modal select'); s.value = 'standard'; s.dispatchEvent(new Event('change')); })()`);
+  await sleep(200);
+  await shot('08-widok-ustawienia', { selectors: ['.modal-header', '.modal .view-groups'], pad: 0 });
   await closeModal();
   await page.click('#btn-clear');
   await shot('05-czyszczenie-zdarzen', { selectors: ['.modal'], pad: 0 });

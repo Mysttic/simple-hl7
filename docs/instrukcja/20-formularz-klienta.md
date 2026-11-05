@@ -4,6 +4,8 @@
 
 ![Formularz panelu Klient: adres bramki, ramka, kodowanie, timeouty, powtórzenia, przełączniki](img/20-formularz-klienta.png)
 
+> W widoku Prosty formularz ma pola **Host**, **Port** i **Kodowanie**, a Standardowy dodaje prefiks, sufiks i timeouty. Pozostałe pola są w widoku Pełny. Ukryte pola nadal działają, patrz [Widok interfejsu](08-widok.md).
+
 Sekcja **Klient** w lewej kolumnie wysyła wiadomości do bramki. Tester sam łączy się z bramką,
 wysyła wiadomość w ramce MLLP i czeka na ACK. Górna część sekcji to ustawienia połączenia opisane
 na tej stronie. Pod nimi jest [edytor wiadomości](21-edytor-wiadomosci.md), a jeszcze niżej

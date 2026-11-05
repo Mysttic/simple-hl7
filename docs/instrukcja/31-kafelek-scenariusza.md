@@ -4,6 +4,8 @@
 
 ![Kafelek scenariusza 01 Czy bramka odpowiada](img/31-kafelek-scenariusza.png)
 
+> Panel **Scenariusze** jest w widokach Standardowy i Pełny. Widok Prosty go ukrywa, patrz [Widok interfejsu](08-widok.md).
+
 Lista **Dostępne scenariusze** ma jeden kafelek na każdy plik `.yaml` z katalogu `scenarios/` obok
 programu. Scenariusz to zapisany test: seria kroków wysyłki, odbioru i pauzy z warunkami, które muszą
 być spełnione.

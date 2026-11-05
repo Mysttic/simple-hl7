@@ -4,6 +4,8 @@
 
 ![Kafelek scenariusza 08 w trakcie wykonywania, przycisk „Zatrzymaj”](img/32-scenariusz-w-trakcie.png)
 
+> Panel **Scenariusze** jest w widokach Standardowy i Pełny. Widok Prosty go ukrywa, patrz [Widok interfejsu](08-widok.md).
+
 Po kliknięciu **Uruchom** kafelek zmienia wygląd: ma podświetloną ramkę, a zamiast **Uruchom** ma
 czerwony przycisk **Zatrzymaj**. Jednocześnie pojawia się powiadomienie „Uruchamiam scenariusz …”.
 

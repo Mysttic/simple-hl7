@@ -4,6 +4,8 @@
 
 ![Inspektor zdarzenia ack.in: nagłówek ACK, walidacja i czasy](img/57-ack-otrzymany.png)
 
+> Walidacja ACK jest w każdym widoku, a sekcję **Czasy** pokazuje widok Pełny, patrz [Widok interfejsu](08-widok.md).
+
 Zdarzenie `ack.in` **ACK odebrany** to potwierdzenie, które bramka odesłała klientowi testera.
 To najważniejsze zdarzenie przy teście bramki jako odbiorcy: mówi, czy bramka przyjęła wiadomość
 i jak szybko odpowiedziała.

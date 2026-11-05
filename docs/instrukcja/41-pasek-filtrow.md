@@ -4,6 +4,8 @@
 
 ![Pasek filtrów: typy, punkty, wyszukiwanie, poziomy, czyszczenie, licznik](img/41-pasek-filtrow.png)
 
+> Filtry są w widokach Standardowy i Pełny. Widok Prosty je ukrywa i czyści, patrz [Widok interfejsu](08-widok.md).
+
 Pasek nad osią czasu zawęża to, co widać. Otwiera go przycisk **Filtry** w górnym pasku albo
 klawisz `/`. Przeglądarka pamięta, czy pasek był otwarty. Wszystkie filtry działają naraz: wiersz
 jest widoczny, gdy spełnia każdy z nich.

@@ -4,6 +4,8 @@
 
 ![Szczegóły nieudanego przebiegu 05 Błędna wiadomość: krok i tabela warunków](img/34-wynik-scenariusza.png)
 
+> Panel **Scenariusze** jest w widokach Standardowy i Pełny. Widok Prosty go ukrywa, patrz [Widok interfejsu](08-widok.md).
+
 Szczegóły przebiegu otwierają się pod listą ostatnich uruchomień po kliknięciu wiersza i od razu po
 zakończeniu scenariusza uruchomionego z tej przeglądarki.
 

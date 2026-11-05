@@ -172,6 +172,8 @@ textarea { resize: vertical; min-height: 60px; }
 .event-counter { font-size: var(--fs-sm); color: var(--fg-dim); padding: 2px 8px; border: 1px solid var(--border); border-radius: 10px; }
 
 .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.view-switch { display: inline-flex; align-items: center; gap: 6px; margin-right: 6px; font-size: var(--fs-sm); color: var(--fg-dim); white-space: nowrap; }
+.view-switch select { width: auto; font-weight: 600; color: var(--fg); }
 
 .dropdown { position: relative; }
 .dropdown-menu {
@@ -385,7 +387,17 @@ textarea { resize: vertical; min-height: 60px; }
 .check-row .form-error { display: none; }
 .check-inline { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: var(--fs-sm); }
 
+/* Settings: interface view (public/js/view.js), every part as a checkbox in its group */
+.view-count { font-size: var(--fs-sm); padding-top: 6px; }
+.view-groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 18px; margin-top: 8px; }
+.view-group h4 { margin: 0 0 4px; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.6px; color: var(--accent); }
+.view-group .check-inline { display: flex; align-items: flex-start; padding: 2px 0; }
+.view-group .check-inline input { flex: 0 0 auto; margin-top: 2px; }
+@media (max-width: 900px) { .view-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 /* Sender */
+/* client fields hidden by the view whose values differ from the defaults */
+.view-hint { margin: 6px 0; padding: 6px 8px; border: 1px solid rgba(210, 153, 34, 0.45); background: rgba(210, 153, 34, 0.1); border-radius: 4px; font-size: var(--fs-sm); color: var(--fg); }
 .picker-row { display: flex; gap: 8px; margin: 6px 0; }
 .picker { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; font-size: var(--fs-sm); }
 .picker select { flex: 1; min-width: 0; }

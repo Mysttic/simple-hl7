@@ -7,6 +7,24 @@ ostatniego wydanego tagu.
 
 ## [Unreleased]
 
+### Dodane
+
+- Widok interfejsu ([#4](https://github.com/Mysttic/simple-hl7/issues/4)): lista **Widok** w górnym pasku
+  i sekcja w oknie Ustawienia przełączają między widokami Prosty, Standardowy, Pełny i Własny (dowolny
+  zestaw z 29 elementów ekranu). Nowa przeglądarka zaczyna w widoku Prosty, a przeglądarka używana
+  wcześniej w widoku Pełny, czyli bez zmian na ekranie.
+- Panel Klient pokazuje ukryte w bieżącym widoku pola z wartością inną niż domyślna i link
+  **Przywróć domyślne**. Błąd w ukrytym polu przy wysyłce podaje nazwę pola.
+- Instrukcja: strona [Widok interfejsu](docs/instrukcja/08-widok.md) i uwaga o widokach na stronach
+  elementów, których nie ma w każdym widoku.
+
+### Zmienione
+
+- Główny zrzut w README i na stronie projektu pokazuje widok Prosty; widok Pełny ma w README osobny zrzut.
+- Sekcja okna Ustawienia z czasem UTC i zdarzeniami bajtów nazywa się **Wyświetlanie**.
+- Widok bez paska filtrów czyści aktywne filtry osi czasu. Gdy widok ukrywa zdarzenia połączeń,
+  eksport bez filtra typów też je pomija.
+
 ## [0.1.1] - 2026-10-08
 
 ### Dodane

@@ -31,6 +31,7 @@ scenariuszy opisuje [docs/SCENARIOS.md](../SCENARIOS.md).
 5. [Czyszczenie zdarzeń](05-czyszczenie-zdarzen.md)
 6. [Brak połączenia z serwerem](06-brak-polaczenia.md)
 7. [Powiadomienia](07-powiadomienia.md)
+8. [Widok interfejsu](08-widok.md)
 
 ### Serwer
 
