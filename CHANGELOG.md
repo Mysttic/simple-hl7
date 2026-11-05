@@ -7,6 +7,10 @@ ostatniego wydanego tagu.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-05
+
+Pierwsze oficjalne wydanie publiczne.
+
 ### Dodane
 
 - Widok interfejsu ([#4](https://github.com/Mysttic/simple-hl7/issues/4)): lista **Widok** w górnym pasku
