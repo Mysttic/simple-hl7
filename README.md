@@ -392,16 +392,16 @@ Procedura wydania:
    `[Unreleased]`, pod nowym numerem i datą).
 2. PR `develop` → `master`, poczekać na zielone CI i podgląd „Release preview”.
 3. Merge. Release i kopia plików wydania na hub dzieją się same.
-4. Gdy wydanie zmienia stronę projektu (opis, zrzuty), skopiować ją ręcznie na hub, patrz
-   [site/README.md](site/README.md).
+4. Strona projektu (`site/simple-hl7/`) sama czyta najnowsze wydanie, więc samo wydanie jej nie
+   zmienia. Jak działa i gdzie ją publikować, opisuje [site/README.md](site/README.md).
 
 Wymagany sekret: `HUB_TOKEN` w ustawieniach repozytorium (Settings, Secrets and variables, Actions):
 fine-grained token dla właściciela `Mysttic`, dostęp tylko do `Mysttic/Mysttic`, uprawnienie
 Contents: Read and write. Bez niego release w tym repozytorium powstanie, a job `site` zakończy się
 czytelnym błędem. Token ma datę ważności; po jej upływie job `site` zatrzyma się tym samym błędem.
 
-Strona projektu na hubie leży gotowa w `site/simple-hl7/`; jak ją podpiąć i odświeżać, opisuje
-[site/README.md](site/README.md).
+Samodzielna strona projektu leży w `site/simple-hl7/`. Zastąpi stronę na hubie, gdy repozytorium
+stanie się publiczne; szczegóły w [site/README.md](site/README.md).
 
 ## Licencja
 

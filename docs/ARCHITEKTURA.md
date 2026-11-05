@@ -41,7 +41,7 @@ scripts/smoke-exe.mjs   test dymny gotowego pliku: start w pustym katalogu, UI, 
 scripts/release-version.sh   porównanie VERSION.md z ostatnim tagiem v*: czy wydawać (CI i Release)
 scripts/changelog-section.sh sekcja CHANGELOG.md jednej wersji, opis release
 .github/workflows/      ci.yml (PR develop do master) i release.yml (wydanie i kopia na hub)
-site/simple-hl7/        strona projektu dla huba Mysttic/Mysttic
+site/simple-hl7/        strona projektu: prezentacja i pobieranie z wydań tego repozytorium
 ```
 
 ## Przepływ

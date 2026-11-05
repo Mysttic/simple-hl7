@@ -7,6 +7,12 @@ ostatniego wydanego tagu.
 
 ## [Unreleased]
 
+### Zmienione
+
+- Strona projektu w `site/simple-hl7` jest samodzielna: własne style i skrypt, pobieranie z wydań
+  tego repozytorium i treść skupiona na prezentacji programu. Zastąpi stronę na hubie, gdy
+  repozytorium stanie się publiczne.
+
 ## [1.0.0] - 2026-11-05
 
 Pierwsze oficjalne wydanie publiczne.
