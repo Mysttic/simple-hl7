@@ -8,7 +8,8 @@
 //
 // Output: dist/simple-hl7-<version>-<target>[.exe] and dist/simple-hl7-<version>-checksums.txt.
 // <target> is windows-amd64, linux-amd64 or linux-arm64: these names are the release contract of the
-// download page (site/simple-hl7/index.html), so they change only together with it.
+// project page on the hub (Mysttic/Mysttic, simple-hl7/index.html) and of docs/PRZEWODNIK.md, so they
+// change only together with them.
 // The version is read from VERSION.md.
 import fs from 'node:fs';
 import path from 'node:path';

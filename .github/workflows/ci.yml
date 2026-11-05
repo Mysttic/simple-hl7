@@ -19,7 +19,6 @@ on:
     paths-ignore:
       - 'README.md'
       - 'docs/**'
-      - 'site/**'
       - '.gitignore'
   workflow_call:
   workflow_dispatch:
