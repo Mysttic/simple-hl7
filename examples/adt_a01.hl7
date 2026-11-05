@@ -1,8 +1,8 @@
 # Przyjęcie pacjenta (ADT^A01): dane z polskimi znakami w UTF-8
 MSH|^~\&|HIS|SZPITAL_LODZ|BRAMKA|LAB_CENTRALNE|{{now}}||ADT^A01^ADT_A01|{{controlId}}|P|2.5|||AL|NE|PL|UNICODE UTF-8
 EVN|A01|{{now}}||||{{now}}
-PID|1||85010212345^^^SZPITAL_LODZ^PI~85010212345^^^PESEL^NNPOL||Zażółć^Gęślą^Jaźń||19850102|M|||ul. Piotrkowska 104^^Łódź^^90-926^PL||+48 42 638 44 44||||||85010212345|||||||||||N
-NK1|1|Zażółć^Łucja^^^^^L|SPO^Małżonek^HL70063|ul. Piotrkowska 104^^Łódź^^90-926^PL|+48 601 234 567
+PID|1||85010212345^^^SZPITAL_LODZ^PI~85010212345^^^PESEL^NNPOL||Zażółć^Gęślą^Jaźń||19850102|M|||ul. Piotrkowska 104^^Łódź^^90-926^PL||+48 00 000 00 01||||||85010212345|||||||||||N
+NK1|1|Zażółć^Łucja^^^^^L|SPO^Małżonek^HL70063|ul. Piotrkowska 104^^Łódź^^90-926^PL|+48 000 000 004
 PV1|1|I|ODDZ_WEWN^SALA_3^LOZKO_2^SZPITAL_LODZ||||12345^Kowalski^Jan^^^dr n. med.|||WEWN||||1|||12345^Kowalski^Jan||V2026-000123|||||||||||||||||||||||||{{now}}
 DG1|1||I10^Nadciśnienie tętnicze samoistne^ICD10|||A
 AL1|1|DA|^Penicylina||Wysypka skórna
