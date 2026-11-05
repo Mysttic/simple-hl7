@@ -7,9 +7,12 @@ import { createInspector } from './inspector.js';
 import { createListenersPanel } from './listeners.js';
 import { createSenderPanel } from './sender.js';
 import { createScenariosPanel } from './scenarios.js';
-import { el, clear, formatTime, formatMs, inputEl, checkboxEl, formField, setFieldError, toInt, debounce } from './format.js';
+import { VIEW_GROUPS, VIEW_KEYS, VIEW_LABELS, normalizeView, hiddenKeys, viewCss } from './view.js';
+import { el, clear, formatTime, formatMs, inputEl, selectEl, checkboxEl, formField, setFieldError, toInt, debounce } from './format.js';
 
 const SETTINGS_KEY = 'hl7t.ui.settings.v1';
+// What the program kept in a browser before the view setting existed: any of it means an earlier user.
+const EARLIER_KEYS = [SETTINGS_KEY, 'hl7t.sender.form.v1', 'hl7t.scenarioTarget'];
 const DEFAULT_SETTINGS = {
   warnMs: 300,
   badMs: 1000,
@@ -24,14 +27,36 @@ const DEFAULT_SETTINGS = {
 const REST_FALLBACK_MS = 3000;
 const BACKFILL_LIMIT = 2000;
 
+function usedBefore() {
+  try {
+    return EARLIER_KEYS.some((key) => localStorage.getItem(key) !== null);
+  } catch (err) {
+    return false;
+  }
+}
+
+/**
+ * Settings from this browser. A view that was never saved comes out as Prosty in a new browser and as
+ * Pełny in one that used the program before (its user knows the full screen); viewStored tells which.
+ */
 function loadSettings() {
+  const fallbackView = usedBefore() ? 'full' : 'simple';
+  const fresh = () => ({ settings: { ...structuredClone(DEFAULT_SETTINGS), view: normalizeView(null, fallbackView) }, viewStored: false });
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
-    if (!raw) return structuredClone(DEFAULT_SETTINGS);
+    if (!raw) return fresh();
     const parsed = JSON.parse(raw);
-    return { ...structuredClone(DEFAULT_SETTINGS), ...parsed, panels: { ...DEFAULT_SETTINGS.panels, ...(parsed.panels || {}) } };
+    return {
+      settings: {
+        ...structuredClone(DEFAULT_SETTINGS),
+        ...parsed,
+        panels: { ...DEFAULT_SETTINGS.panels, ...(parsed.panels || {}) },
+        view: normalizeView(parsed.view, fallbackView),
+      },
+      viewStored: !!parsed.view,
+    };
   } catch (err) {
-    return structuredClone(DEFAULT_SETTINGS);
+    return fresh();
   }
 }
 
@@ -42,7 +67,7 @@ function $(id) {
 }
 
 function init() {
-  const settings = loadSettings();
+  const { settings, viewStored } = loadSettings();
   const saveSettings = () => {
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
@@ -70,6 +95,8 @@ function init() {
   const btnInspector = $('btn-inspector');
   const exportMenu = $('export-menu');
   const btnExport = $('btn-export');
+  const viewStyleEl = $('view-style');
+  const viewSelect = $('view-select');
   const mq = window.matchMedia('(max-width: 1700px)');
 
   let state = null;
@@ -85,6 +112,15 @@ function init() {
   btnInspector.classList.toggle('active', !settings.inspectorCollapsed);
   filtersEl.hidden = !settings.filtersOpen;
   btnFilters.classList.toggle('active', !!settings.filtersOpen);
+
+  // ---- view: which parts of the screen are shown (public/js/view.js) ------------------
+  // Set before the panels are drawn: they read view.isHidden() for the parts drawn in code.
+
+  let hiddenView = hiddenKeys(settings.view);
+  viewStyleEl.textContent = viewCss(hiddenView);
+  for (const [value, label] of Object.entries(VIEW_LABELS)) viewSelect.append(el('option', { value }, label));
+  viewSelect.value = settings.view.preset;
+  const view = { isHidden: (key) => hiddenView.has(key) };
 
   // ---- toasts ----------------------------------------------------------------------
 
@@ -266,7 +302,7 @@ function init() {
     if (ev) {
       timeline.select(numId, { scroll: true });
       if (!timeline.element.querySelector(`tr[data-id="${numId}"]`)) {
-        notify(`Zdarzenie #${numId} jest ukryte przez filtry, pokazano je w inspektorze`, 'info');
+        notify(`Zdarzenie #${numId} jest ukryte na osi czasu (filtry albo widok), pokazano je w inspektorze`, 'info');
       }
       return;
     }
@@ -322,6 +358,7 @@ function init() {
   const ctx = {
     api,
     settings,
+    view,
     notify,
     openModal,
     confirm: confirmDialog,
@@ -335,6 +372,8 @@ function init() {
       showPanel('sender');
     },
     setEndpointFilter(endpointId) {
+      // the buttons that call this are hidden together with the filter bar
+      if (view.isHidden('top.filters')) return;
       showFilters(true);
       timeline.setFilters({ endpoint: endpointId });
       notify(`Oś czasu: tylko ${endpointId}`, 'info');
@@ -351,6 +390,9 @@ function init() {
   listeners = createListenersPanel({ root: $('listeners-body'), ctx });
   sender = createSenderPanel({ root: $('sender-body'), ctx });
   scenarios = createScenariosPanel({ root: $('scenarios-body'), ctx });
+
+  // the view worked out on this visit (new browser: Prosty, earlier user: Pełny) stays for the next one
+  if (!viewStored) saveSettings();
 
   timeline.onSelect((ev) => {
     if (ev) inspector.show(ev);
@@ -592,18 +634,94 @@ function init() {
   btnSettings.addEventListener('click', openSettings);
   $('btn-add-listener').addEventListener('click', () => listeners.openNew());
 
+  // ---- view switching ------------------------------------------------------------------------
+
+  /** Applies settings.view: the CSS rule, then what is drawn in code (timeline columns, inspector tabs, client hint). */
+  function applyView({ save = true } = {}) {
+    settings.view = normalizeView(settings.view);
+    hiddenView = hiddenKeys(settings.view);
+    viewStyleEl.textContent = viewCss(hiddenView);
+    viewSelect.value = settings.view.preset;
+    // a filter left on under a hidden filter bar would thin out the timeline with no visible reason
+    if (hiddenView.has('top.filters') && timeline.hasActiveFilters()) {
+      timeline.resetFilters();
+      notify('Filtry osi czasu wyczyszczone: ten widok nie pokazuje paska filtrów', 'info');
+    }
+    timeline.applyView();
+    inspector.refresh();
+    sender.applyView();
+    if (save) saveSettings();
+  }
+
+  viewSelect.addEventListener('change', () => {
+    const preset = viewSelect.value;
+    if (preset === 'custom' && !settings.view.custom) {
+      // the first Własny starts from what is on the screen now; the settings window lists every part
+      settings.view = { preset, custom: [...hiddenView] };
+      applyView();
+      openSettings();
+      return;
+    }
+    settings.view = { ...settings.view, preset };
+    applyView();
+  });
+
   function openSettings() {
+    const viewBefore = structuredClone(settings.view);
+    let saved = false;
+
+    // view: the preset, then every part as a checkbox (checked = visible); a change shows at once
+    const presetSel = selectEl(Object.entries(VIEW_LABELS), settings.view.preset);
+    const countEl = el('div', { class: 'view-count' });
+    const boxes = new Map();
+    const showCount = () => {
+      countEl.textContent = `${VIEW_KEYS.length - hiddenView.size} z ${VIEW_KEYS.length}`;
+    };
+    const previewView = () => {
+      applyView({ save: false });
+      presetSel.value = settings.view.preset;
+      for (const [key, cb] of boxes) cb.checked = !hiddenView.has(key);
+      showCount();
+    };
+    const groups = el('div', { class: 'view-groups' }, ...VIEW_GROUPS.map((group) => el('div', { class: 'view-group' },
+      el('h4', {}, group.title),
+      ...group.items.map((item) => {
+        const cb = checkboxEl(!hiddenView.has(item.key));
+        boxes.set(item.key, cb);
+        cb.addEventListener('change', () => {
+          const hidden = new Set(hiddenView);
+          if (cb.checked) hidden.delete(item.key);
+          else hidden.add(item.key);
+          settings.view = { preset: 'custom', custom: [...hidden] };
+          previewView();
+        });
+        return el('label', { class: 'check-inline' }, cb, el('span', {}, item.label));
+      }))));
+    presetSel.addEventListener('change', () => {
+      const preset = presetSel.value;
+      settings.view = preset === 'custom'
+        ? { preset, custom: settings.view.custom || [...hiddenView] }
+        : { ...settings.view, preset };
+      previewView();
+    });
+    showCount();
+
     const warn = inputEl({ type: 'number', min: '1', value: String(settings.warnMs), class: 'mono' });
     const bad = inputEl({ type: 'number', min: '1', value: String(settings.badMs), class: 'mono' });
     const showBytes = checkboxEl(settings.showBytes);
     const utc = checkboxEl(settings.utc);
     const offset = ws.getOffsetMs();
     const body = el('div', {},
+      el('h3', { class: 'form-section' }, 'Widok interfejsu (zapisywany w tej przeglądarce)'),
+      el('div', { class: 'form-grid cols-2' },
+        formField('Widok', presetSel, 'Prosty: wysyłka, odbiór i treść wiadomości. Standardowy: do tego ramka, filtry, eksport i scenariusze. Pełny: wszystko. Zmiana pola poniżej przełącza na Własny.'),
+        el('div', { class: 'form-field' }, el('label', {}, 'Widoczne elementy'), countEl)),
+      groups,
       el('h3', { class: 'form-section' }, 'Progi czasów odpowiedzi (zapisywane na serwerze)'),
       el('div', { class: 'form-grid cols-2' },
         formField('Próg ostrzeżenia (ms)', warn, 'Czasy >= progu są oznaczane na żółto.'),
         formField('Próg błędu (ms)', bad, 'Czasy >= progu są oznaczane na czerwono.')),
-      el('h3', { class: 'form-section' }, 'Widok (zapisywane w tej przeglądarce)'),
+      el('h3', { class: 'form-section' }, 'Wyświetlanie (zapisywane w tej przeglądarce)'),
       el('div', { class: 'form-grid cols-1' },
         formField('Pokazuj zdarzenia bytes.in / bytes.out', showBytes, 'Wyłącz przy dużym ruchu; eksport również je pominie.'),
         formField('Czas w UTC zamiast lokalnego', utc, 'Dotyczy osi czasu, inspektora, kart i zegara w górnym pasku.')),
@@ -615,6 +733,13 @@ function init() {
     const modal = openModal({
       title: 'Ustawienia',
       body,
+      wide: true,
+      // closing without Zapisz takes back the view tried out in this window
+      onClose: () => {
+        if (saved) return;
+        settings.view = viewBefore;
+        applyView({ save: false });
+      },
       actions: [
         { label: 'Anuluj', onClick: (close) => close() },
         {
@@ -654,6 +779,7 @@ function init() {
               inspector.refresh();
               listeners.render();
               notify('Ustawienia zapisane', 'info');
+              saved = true;
               close();
             } catch (err) {
               modal.setError(`Nie udało się zapisać progów na serwerze: ${err.message}`);
@@ -781,6 +907,7 @@ function init() {
         inspector.clear();
         break;
       case '/':
+        if (view.isHidden('top.filters')) break;
         e.preventDefault();
         showFilters(true);
         {

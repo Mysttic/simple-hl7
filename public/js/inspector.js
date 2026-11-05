@@ -15,7 +15,7 @@ import {
 const TABS = [
   { id: 'readable', label: 'Czytelny', needs: 'text', title: 'Segmenty z kolorowaniem składni' },
   { id: 'tree', label: 'Drzewo', needs: 'text', title: 'Segmenty, pola, komponenty z nazwami ze słownika' },
-  { id: 'hex', label: 'Hex', needs: 'hex', title: 'Zrzut bajtów ramki z zaznaczonym prefiksem i sufiksem' },
+  { id: 'hex', label: 'Hex', needs: 'hex', title: 'Zrzut bajtów ramki z zaznaczonym prefiksem i sufiksem', view: 'inspector.hex' },
 ];
 
 const MAX_TEXT_CHARS = 300000;
@@ -66,7 +66,7 @@ export function renderTimingsBar(timing, settings) {
 
 /** Framing badges: prefix / suffix ok or mismatch, segment separator, trailing CR, non-ASCII, control chars, variant, encoding hint. */
 export function renderFramingBadges(framing, opts = {}) {
-  const wrap = el('div', { class: 'insp-badges' });
+  const wrap = el('div', { class: 'insp-badges', 'data-view': 'inspector.framing' });
   if (!framing || typeof framing !== 'object') return wrap;
   const pExp = framing.prefixHexExpected || '';
   const pAct = framing.prefixHexActual || '';
@@ -238,19 +238,21 @@ export function createInspector({ root, ctx }) {
       grid.append(kv('Control ID (MSH-10)', s.controlId || '(brak)', { mono: true }));
       grid.append(kv('Nadawca (MSH-3 / MSH-4)', `${s.sendingApplication || '?'} / ${s.sendingFacility || '?'}`, { mono: true }));
       grid.append(kv('Odbiorca (MSH-5 / MSH-6)', `${s.receivingApplication || '?'} / ${s.receivingFacility || '?'}`, { mono: true }));
-      grid.append(kv('Wersja / tryb (MSH-12 / MSH-11)', `${s.version || '?'} / ${s.processingId || '?'}`, { mono: true }));
-      grid.append(kv('Czas wiadomości (MSH-7)', s.timestamp || '(brak)', { mono: true }));
+      // the rest of the header goes with the detailed view (inspector.details)
+      const more = { mono: true, view: 'inspector.details' };
+      grid.append(kv('Wersja / tryb (MSH-12 / MSH-11)', `${s.version || '?'} / ${s.processingId || '?'}`, more));
+      grid.append(kv('Czas wiadomości (MSH-7)', s.timestamp || '(brak)', more));
       grid.append(kv('Kodowanie', [
         el('span', { class: 'mono' }, d.encoding || '?'),
         ENCODING_LABELS[d.encoding] ? el('span', { class: 'dim' }, ` ${ENCODING_LABELS[d.encoding]}`) : null,
         el('span', { class: 'dim' }, s.characterSet ? `, MSH-18: ${s.characterSet}` : ', MSH-18 puste'),
-      ]));
-      grid.append(kv('Segmenty', `${(s.segmentNames || []).join(' ')} (${s.segmentCount ?? (s.segmentNames || []).length})`, { mono: true }));
+      ], { view: 'inspector.details' }));
+      grid.append(kv('Segmenty', `${(s.segmentNames || []).join(' ')} (${s.segmentCount ?? (s.segmentNames || []).length})`, more));
     } else {
       grid.append(kv('Parsowanie', el('span', { class: 'text-error' }, `nie powiodło się: ${d.parseError || 'nieznany błąd'}`)));
       grid.append(kv('Kodowanie', d.encoding || '?', { mono: true }));
     }
-    grid.append(kv('Rozmiar', `${formatBytes(d.raw && d.raw.length)} (ramka z prefiksem i sufiksem), ${(d.text || '').length} znaków`));
+    grid.append(kv('Rozmiar', `${formatBytes(d.raw && d.raw.length)} (ramka z prefiksem i sufiksem), ${(d.text || '').length} znaków`, { view: 'inspector.details' }));
 
     const parts = [grid, renderFramingBadges(d.framing, { encoding: d.encoding, characterSet: s && s.characterSet })];
     const warnings = []
@@ -288,26 +290,28 @@ export function createInspector({ root, ctx }) {
 
   function renderTypeSpecific(ev) {
     const d = ev.data || {};
+    // the ACK validation stays in every view; timings and the other sections go with inspector.details
+    const details = 'inspector.details';
     switch (ev.type) {
       case 'ack.in':
         return el('div', {}, renderAckValidation(d.validation),
-          el('div', { class: 'insp-section' }, el('h4', {}, 'Czasy'), renderTimingsBar(d.timing, ctx.settings), renderTimingTable(d.timing)));
+          el('div', { class: 'insp-section', 'data-view': details }, el('h4', {}, 'Czasy'), renderTimingsBar(d.timing, ctx.settings), renderTimingTable(d.timing)));
       case 'ack.out':
-        return el('div', { class: 'insp-section' }, el('h4', {}, 'Szczegóły ACK'), el('div', { class: 'insp-grid' },
+        return el('div', { class: 'insp-section', 'data-view': details }, el('h4', {}, 'Szczegóły ACK'), el('div', { class: 'insp-grid' },
           kv('Tryb ACK', d.mode || '?', { mono: true }),
           kv('Opóźnienie skonfigurowane', formatMs(d.delayMs || 0)),
           kv('Czas przetwarzania', badge(formatMs(d.processingMs), `lat ${latencyClass(d.processingMs, ctx.settings)}`, 'Od kompletnej ramki wejściowej do zapisania ACK do gniazda')),
           kv('W odpowiedzi na (MSA-2)', d.inReplyTo || '(brak)', { mono: true })));
       case 'msg.in': {
         const t = d.timing || {};
-        return el('div', { class: 'insp-section' }, el('h4', {}, 'Odbiór'), el('div', { class: 'insp-grid' },
+        return el('div', { class: 'insp-section', 'data-view': details }, el('h4', {}, 'Odbiór'), el('div', { class: 'insp-grid' },
           kv('Czas odbioru ramki', badge(formatMs(t.receiveMs ?? ev.latencyMs), `lat ${latencyClass(t.receiveMs ?? ev.latencyMs, ctx.settings)}`, 'Od pierwszego bajtu do kompletnej ramki')),
           kv('Pierwszy bajt', t.firstByteTs ? formatDateTime(t.firstByteTs, ctx.settings.utc) : '?', { mono: true, title: t.firstByteTs || null }),
           kv('Ostatni bajt', t.lastByteTs ? formatDateTime(t.lastByteTs, ctx.settings.utc) : '?', { mono: true, title: t.lastByteTs || null }),
           kv('Bajty', formatBytes(t.bytes ?? (d.raw && d.raw.length)))));
       }
       case 'msg.out':
-        return el('div', { class: 'insp-section' }, el('h4', {}, 'Wysyłka'), el('div', { class: 'insp-grid' },
+        return el('div', { class: 'insp-section', 'data-view': details }, el('h4', {}, 'Wysyłka'), el('div', { class: 'insp-grid' },
           kv('Próba', String(d.attempt ?? 1)),
           kv('Numer powtórzenia', String((d.repeatIndex ?? 0) + 1))));
       default:
@@ -415,10 +419,20 @@ export function createInspector({ root, ctx }) {
     const text = textOf(ev);
     const hex = hexOf(ev);
     if (text) bar.append(btn('Kopiuj tekst', () => ctx.copy(text, 'Tekst HL7'), 'Skopiuj treść HL7 do schowka (separatory segmentów jak w zdarzeniu)'));
-    if (hex) bar.append(btn('Kopiuj hex', () => ctx.copy(spacedHex(hex), 'Hex'), 'Skopiuj bajty ramki jako hex'));
+    if (hex) {
+      const hexBtn = btn('Kopiuj hex', () => ctx.copy(spacedHex(hex), 'Hex'), 'Skopiuj bajty ramki jako hex');
+      hexBtn.dataset.view = 'inspector.hex';
+      bar.append(hexBtn);
+    }
     if (text && isMessageEvent(ev)) bar.append(btn('Wyślij ponownie', () => ctx.resend(text, ev), 'Załaduj tę wiadomość do formularza nadawcy', 'btn btn-sm btn-primary'));
-    if (ev.type === 'msg.in' && text) bar.append(btn('Podgląd ACK', () => openAckPreview(ev), 'Wygeneruj ACK dla tej wiadomości (bez wysyłania)'));
-    bar.append(btn('Kopiuj JSON', () => ctx.copy(safeJson(ev), 'JSON zdarzenia'), 'Skopiuj pełne zdarzenie jako JSON'));
+    if (ev.type === 'msg.in' && text) {
+      const ackBtn = btn('Podgląd ACK', () => openAckPreview(ev), 'Wygeneruj ACK dla tej wiadomości (bez wysyłania)');
+      ackBtn.dataset.view = 'inspector.tools';
+      bar.append(ackBtn);
+    }
+    const jsonBtn = btn('Kopiuj JSON', () => ctx.copy(safeJson(ev), 'JSON zdarzenia'), 'Skopiuj pełne zdarzenie jako JSON');
+    jsonBtn.dataset.view = 'inspector.tools';
+    bar.append(jsonBtn);
     return bar;
   }
 
@@ -448,7 +462,8 @@ export function createInspector({ root, ctx }) {
   function availableTabs(ev) {
     const hasText = !!textOf(ev);
     const hasHex = !!hexOf(ev);
-    return TABS.filter((t) => !t.needs || (t.needs === 'text' ? hasText : hasHex));
+    return TABS.filter((t) => (!t.needs || (t.needs === 'text' ? hasText : hasHex))
+      && !(t.view && ctx.view && ctx.view.isHidden(t.view)));
   }
 
   function renderTabs(ev) {

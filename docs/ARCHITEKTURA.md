@@ -32,6 +32,7 @@ src/hl7/                parser, tokenizer, słownik segmentów i pól, szablony,
 src/scenarios/runner.js scenariusze YAML: walidacja, uruchamianie, asercje
 src/web/server.js       REST, WebSocket, pliki interfejsu (z dysku albo z zasobów exe)
 public/                 interfejs: index.html, css/app.css, js/*.js
+public/js/view.js       widoki interfejsu: elementy, które da się ukryć, presety Prosty, Standardowy, Pełny
 scripts/build-exe.mjs   budowa pliku wykonywalnego (Node SEA)
 scripts/screenshots.mjs zrzuty do README (docs/img) przez headless Edge lub Chrome
 scripts/manual-shots.mjs zrzut każdego elementu interfejsu do instrukcji (docs/instrukcja/img) i kontrola podstron
@@ -61,6 +62,14 @@ Zamknięcie połączenia w trakcie niepełnego ACK daje `frame.incomplete`.
 zdarzenie osobno. Gdy klient nie nadąża (bufor WebSocket ponad 16 MB, np. przy wiadomościach po kilka MB),
 serwer przestaje wysyłać mu zdarzenia, a po opróżnieniu bufora wysyła `gap` i klient dociąga brakujące
 zdarzenia przez REST.
+
+**Widok interfejsu.** `public/js/view.js` wymienia elementy ekranu, które widok może ukryć (klucz, nazwa,
+grupa), i trzy presety. Element do ukrycia ma `data-view="<klucz>"`; przy kilku kluczach oddzielonych
+spacją znika, gdy ukryty jest którykolwiek. `app.js` zamienia ukryte klucze na jedną regułę CSS
+w `<style id="view-style">`. Kolumny osi czasu, zdarzenia połączeń i zakładkę Hex rysuje kod, więc
+pytają `ctx.view.isHidden(klucz)`. Wybór leży w `localStorage` (`hl7t.ui.settings.v1`, pole `view`).
+`test/view.test.js` pilnuje, żeby każdy klucz użyty w interfejsie istniał w `view.js` i żeby każdy klucz
+z `view.js` coś ukrywał.
 
 ## Zdarzenia
 

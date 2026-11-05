@@ -4,6 +4,8 @@
 
 ![Inspektor zdarzenia ack.out: nagłówek ACK, ramka, powiązana wiadomość, szczegóły ACK](img/55-ack-wyslany.png)
 
+> Sekcję **Szczegóły ACK** pokazuje widok Pełny, patrz [Widok interfejsu](08-widok.md).
+
 Zdarzenie `ack.out` **ACK wysłany** to potwierdzenie, które listener testera odesłał bramce na
 odebraną wiadomość.
 

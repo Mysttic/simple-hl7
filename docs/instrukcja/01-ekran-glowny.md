@@ -7,6 +7,9 @@
 Po otwarciu adresu programu w przeglądarce (domyślnie `http://localhost:7575`) widać jeden ekran
 podzielony na cztery obszary. Wszystko, co dzieje się w testerze, widać od razu, bez odświeżania strony.
 
+Zrzut pokazuje widok **Pełny**. Przeglądarka, która otwiera program pierwszy raz, zaczyna w widoku
+**Prosty** z mniejszą liczbą szczegółów, patrz [Widok interfejsu](08-widok.md).
+
 ## Obszary ekranu
 
 | Obszar | Gdzie | Do czego służy |
@@ -57,7 +60,7 @@ Skróty nie działają, gdy kursor stoi w polu tekstowym, z wyjątkiem `Ctrl+Ent
 | Co | Gdzie | Widoczne dla |
 |---|---|---|
 | listenery, domyślne ustawienia klienta, progi czasów | plik `config/app.json` obok programu | wszystkich użytkowników tego programu |
-| formularz klienta, adres bramki dla scenariuszy, rozwinięte sekcje, szerokość inspektora, pokazywanie zdarzeń bajtów, strefa czasu | pamięć tej przeglądarki | tylko tej przeglądarki na tym komputerze |
+| widok interfejsu, formularz klienta, adres bramki dla scenariuszy, rozwinięte sekcje, szerokość inspektora, pokazywanie zdarzeń bajtów, strefa czasu | pamięć tej przeglądarki | tylko tej przeglądarki na tym komputerze |
 | zdarzenia | pamięć programu (ostatnie 5000) i plik `logs/events.ndjson` | wszystkich |
 
 ---

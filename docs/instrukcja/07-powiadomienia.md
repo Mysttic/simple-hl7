@@ -1,6 +1,6 @@
 # Powiadomienia
 
-[Spis treści](README.md) · Poprzednia: [Brak połączenia z serwerem](06-brak-polaczenia.md) · Następna: [Kafelek serwera](10-kafelek-serwera.md) <!-- nav -->
+[Spis treści](README.md) · Poprzednia: [Brak połączenia z serwerem](06-brak-polaczenia.md) · Następna: [Widok interfejsu](08-widok.md) <!-- nav -->
 
 ![Dwa powiadomienia: informacja o starcie scenariusza i błąd jego wyniku](img/07-powiadomienia.png)
 
@@ -38,4 +38,4 @@ połączeń, wyniki scenariuszy), jest zawsze także na [osi czasu](40-os-czasu.
 
 ---
 
-[Spis treści](README.md) · Poprzednia: [Brak połączenia z serwerem](06-brak-polaczenia.md) · Następna: [Kafelek serwera](10-kafelek-serwera.md) <!-- nav -->
+[Spis treści](README.md) · Poprzednia: [Brak połączenia z serwerem](06-brak-polaczenia.md) · Następna: [Widok interfejsu](08-widok.md) <!-- nav -->

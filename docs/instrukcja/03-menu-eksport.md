@@ -4,6 +4,8 @@
 
 ![Rozwinięte menu Eksport z pozycjami CSV i NDJSON](img/03-menu-eksport.png)
 
+> Eksport jest w widokach Standardowy i Pełny. Widok Prosty go ukrywa, patrz [Widok interfejsu](08-widok.md).
+
 Przycisk **Eksport ▾** w górnym pasku rozwija menu z dwoma formatami. Wybranie formatu od razu pobiera
 plik do folderu pobierania przeglądarki. Menu zamyka się po wyborze albo po kliknięciu w innym miejscu.
 

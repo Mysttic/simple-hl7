@@ -6,7 +6,10 @@ i obsługiwać z własnego laptopa. Każde zdarzenie na łączu (połączenie, b
 ma znacznik czasu z dokładnością do milisekundy, a każda ramka jest sprawdzana bajt po bajcie:
 prefiks, sufiks, separatory segmentów i kodowanie.
 
-![Oś czasu z łańcuchami wiadomość i ACK, inspektor z pokolorowanym ADT^A01](docs/img/glowny.png)
+![Widok Prosty: serwer, klient, oś czasu z łańcuchami wiadomość i ACK, inspektor z pokolorowanym ADT^A01](docs/img/glowny.png)
+
+Na zrzucie widok **Prosty**, w którym program startuje w nowej przeglądarce. Ramkę, czasy, filtry
+i scenariusze pokazują widoki **Standardowy** i **Pełny**, patrz [Widok interfejsu](#widok-interfejsu).
 
 Szczegółowa instrukcja obsługi, z opisem każdego kafelka, formularza i okna: [docs/instrukcja](docs/instrukcja/README.md).
 
@@ -69,6 +72,25 @@ usługa systemd na Linuksie, firewall) opisuje [docs/DEPLOY.md](docs/DEPLOY.md).
 może pokazać ostrzeżenie. Wybierz „Więcej informacji”, a potem „Uruchom mimo to”. Sumy kontrolne
 SHA-256 są w pliku `simple-hl7-<wersja>-checksums.txt` z tego samego wydania.
 
+## Widok interfejsu
+
+Lista **Widok** w górnym pasku decyduje, ile szczegółów pokazuje ekran. Ukryte elementy nadal działają,
+zmienia się tylko to, co widać.
+
+| Widok | Co pokazuje |
+|---|---|
+| **Prosty** | serwer, klient (host, port, kodowanie, edytor), oś czasu z kolumnami Czas, Typ, Opis i Czas odp., inspektor z danymi MSH, walidacją ACK i zakładkami Czytelny i Drzewo |
+| **Standardowy** | do tego ramkę (prefiks i sufiks) w kliencie, na kafelkach i w inspektorze, statystyki serwera, timeouty, filtry, eksport, scenariusze, kolumnę Punkt i zakładkę Hex |
+| **Pełny** | wszystko, w tym zegar, licznik, ramkę ACK, serię wysyłek, przełączniki klienta, pasek czasów, kolumny Δ i Bajty, zdarzenia połączeń, Kopiuj JSON i Podgląd ACK |
+| **Własny** | dowolny zestaw z 29 elementów, zaznaczony w oknie **⚙ Ustawienia** |
+
+Nowa przeglądarka zaczyna w widoku Prosty, a przeglądarka, w której program był już używany, w widoku
+Pełny. Wybór zapisuje się w przeglądarce. Gdy ukryte pole klienta ma wartość inną niż domyślna, panel
+**Klient** pokazuje to nad przyciskiem **Wyślij** z linkiem **Przywróć domyślne**. Opisy w dalszej części
+README dotyczą widoku Pełny. Szczegóły: [instrukcja, Widok interfejsu](docs/instrukcja/08-widok.md).
+
+![Widok Pełny: kolumny Δ, Punkt i Bajty, statystyki serwera, pełny formularz klienta, znaczki ramki i szczegóły w inspektorze](docs/img/glowny-pelny.png)
+
 ## Pierwszy test krok po kroku
 
 Przykład: u klienta jest bramka integracyjna, do której HIS wysyła ADT, a która przekazuje wyniki
@@ -82,12 +104,14 @@ z laboratorium dalej. Sprawdzamy oba kierunki.
    netsh advfirewall firewall add rule name="HL7 tester MLLP" dir=in action=allow protocol=TCP localport=2575
    ```
 
-3. **Sprawdź, czy bramka w ogóle odpowiada.** W panelu **Scenariusze** wpisz host i port bramki,
-   a potem uruchom `01 Czy bramka odpowiada`. Zielony wynik oznacza, że bramka przyjmuje połączenie,
-   rozumie ramkę MLLP i odsyła ACK z poprawnym MSA-2.
+3. **Sprawdź, czy bramka w ogóle odpowiada.** Ustaw **Widok** w górnym pasku na **Standardowy**
+   (panel **Scenariusze**, filtry, eksport i znaczki ramki). W panelu **Scenariusze** wpisz host i port
+   bramki, a potem uruchom `01 Czy bramka odpowiada`. Zielony wynik oznacza, że bramka przyjmuje
+   połączenie, rozumie ramkę MLLP i odsyła ACK z poprawnym MSA-2.
 4. **Wyślij konkretną wiadomość.** W panelu **Klient** podaj host i port bramki, wybierz przykład
-   (np. `adt_a01.hl7`) i naciśnij **Wyślij** albo Ctrl+Enter. Wynik pokazuje MSA-1, zgodność MSA-2
-   z wysłanym MSH-10, ramkę ACK i rozkład czasu: połączenie, wysyłka, pierwszy bajt odpowiedzi, kompletny ACK.
+   (np. `adt_a01.hl7`) i naciśnij **Wyślij** albo Ctrl+Enter. Wynik pokazuje MSA-1 i zgodność MSA-2
+   z wysłanym MSH-10, a w widoku Pełny także ramkę ACK i rozkład czasu: połączenie, wysyłka, pierwszy
+   bajt odpowiedzi, kompletny ACK.
 
    ![Wynik wysyłki: ACK AA, zgodny control id, pasek czasów](docs/img/klient-wynik.png)
 

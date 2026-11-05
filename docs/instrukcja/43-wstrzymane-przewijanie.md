@@ -4,6 +4,8 @@
 
 ![Dół osi czasu z przyciskiem „27 nowych ↓” po wstrzymaniu przewijania](img/43-wstrzymane-przewijanie.png)
 
+> Przycisk **⏸ Autoprzewijanie** jest w widoku Pełny. W pozostałych przewijanie wstrzymuje `Spacja` albo przewinięcie osi czasu w górę, a przycisk z liczbą nowych zdarzeń działa tak samo, patrz [Widok interfejsu](08-widok.md).
+
 Oś czasu sama przewija się do najnowszego zdarzenia. Przy dużym ruchu utrudnia to czytanie, więc
 przewijanie można wstrzymać.
 

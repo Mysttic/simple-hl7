@@ -4,6 +4,8 @@
 
 ![Inspektor zdarzenia msg.out wysłanego przez klienta](img/56-wiadomosc-wyslana.png)
 
+> Sekcję **Wysyłka** pokazuje widok Pełny, patrz [Widok interfejsu](08-widok.md).
+
 Zdarzenie `msg.out` **Wiadomość wysłana** to wiadomość, którą klient testera wysłał do bramki,
 z panelu Klient albo ze scenariusza.
 

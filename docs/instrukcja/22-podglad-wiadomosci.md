@@ -4,6 +4,8 @@
 
 ![Okno „Podgląd wiadomości” z treścią po podstawieniu placeholderów](img/22-podglad-wiadomosci.png)
 
+> Przycisk **Podgląd szablonu** jest w widoku Pełny, patrz [Widok interfejsu](08-widok.md).
+
 Okno otwiera przycisk **Podgląd szablonu** pod edytorem w sekcji Klient. Pokazuje, jak wiadomość
 będzie wyglądać po podstawieniu placeholderów, zanim zostanie wysłana.
 

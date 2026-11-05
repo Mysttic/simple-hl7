@@ -7,6 +7,8 @@
   <title>simple-hl7</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2311151b'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='13' font-weight='700' text-anchor='middle' fill='%234f8cff'%3EHL7%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="/css/app.css">
+  <!-- filled by app.js: hides the elements whose data-view key the chosen view hides (public/js/view.js) -->
+  <style id="view-style"></style>
 </head>
 <body>
   <header id="topbar" class="topbar">
@@ -20,21 +22,25 @@
         <span class="dot" aria-hidden="true"></span>
         <span class="label">łączenie...</span>
       </span>
-      <span id="server-clock" class="server-clock mono" title="Czas serwera" aria-live="off">--:--:--.---</span>
-      <span id="event-counter" class="event-counter mono" title="Widoczne / wszystkie zdarzenia">0 / 0</span>
+      <span id="server-clock" class="server-clock mono" title="Czas serwera" aria-live="off" data-view="top.clock">--:--:--.---</span>
+      <span id="event-counter" class="event-counter mono" title="Widoczne / wszystkie zdarzenia" data-view="top.counter">0 / 0</span>
     </div>
     <div class="topbar-actions">
-      <button id="btn-pause" class="btn" type="button" title="Wstrzymaj autoprzewijanie osi czasu (spacja)">⏸ Autoprzewijanie</button>
-      <button id="btn-filters" class="btn" type="button" title="Pokaż / ukryj pasek filtrów (/)">Filtry</button>
-      <div class="dropdown">
+      <label class="view-switch" title="Widok interfejsu: ile szczegółów pokazywać. Własny zestaw elementów ustawisz w oknie Ustawienia">
+        <span>Widok</span>
+        <select id="view-select" aria-label="Widok interfejsu"></select>
+      </label>
+      <button id="btn-pause" class="btn" type="button" title="Wstrzymaj autoprzewijanie osi czasu (spacja)" data-view="top.pause">⏸ Autoprzewijanie</button>
+      <button id="btn-filters" class="btn" type="button" title="Pokaż / ukryj pasek filtrów (/)" data-view="top.filters">Filtry</button>
+      <div class="dropdown" data-view="top.export">
         <button id="btn-export" class="btn" type="button" title="Eksportuj zdarzenia z bieżącymi filtrami" aria-haspopup="true" aria-expanded="false">Eksport ▾</button>
         <div id="export-menu" class="dropdown-menu" hidden>
           <button type="button" data-format="csv" title="Plik CSV: id, czas, źródło, typ, opis, czas odpowiedzi">CSV</button>
           <button type="button" data-format="ndjson" title="Plik NDJSON: jedno pełne zdarzenie na wiersz">NDJSON</button>
         </div>
       </div>
-      <button id="btn-clear" class="btn btn-danger-ghost" type="button" title="Wyczyść bufor zdarzeń na serwerze (z potwierdzeniem)">Wyczyść</button>
-      <button id="btn-settings" class="btn" type="button" title="Ustawienia: progi czasów, zdarzenia bajtowe, strefa czasu">⚙ Ustawienia</button>
+      <button id="btn-clear" class="btn btn-danger-ghost" type="button" title="Wyczyść bufor zdarzeń na serwerze (z potwierdzeniem)" data-view="top.clear">Wyczyść</button>
+      <button id="btn-settings" class="btn" type="button" title="Ustawienia: widok interfejsu, progi czasów, zdarzenia bajtowe, strefa czasu">⚙ Ustawienia</button>
       <button id="btn-inspector" class="btn" type="button" title="Pokaż / ukryj inspektor (i)">Inspektor</button>
     </div>
   </header>
@@ -45,7 +51,7 @@
 
   <main id="main" class="main">
     <aside id="left" class="left" aria-label="Panele sterowania">
-      <section class="panel" id="panel-listeners" data-panel="listeners">
+      <section class="panel" id="panel-listeners" data-panel="listeners" data-view="listeners">
         <header class="panel-header">
           <button class="panel-toggle" type="button" aria-expanded="true" title="Zwiń / rozwiń sekcję">
             <span class="chevron" aria-hidden="true"></span>Serwer <span class="panel-sub">nasłuch MLLP, bramka łączy się do nas</span>
@@ -57,7 +63,7 @@
         <div class="panel-body" id="listeners-body"></div>
       </section>
 
-      <section class="panel" id="panel-sender" data-panel="sender">
+      <section class="panel" id="panel-sender" data-panel="sender" data-view="sender">
         <header class="panel-header">
           <button class="panel-toggle" type="button" aria-expanded="true" title="Zwiń / rozwiń sekcję">
             <span class="chevron" aria-hidden="true"></span>Klient <span class="panel-sub">łączymy się do bramki i wysyłamy</span>
@@ -66,7 +72,7 @@
         <div class="panel-body" id="sender-body"></div>
       </section>
 
-      <section class="panel" id="panel-scenarios" data-panel="scenarios">
+      <section class="panel" id="panel-scenarios" data-panel="scenarios" data-view="scenarios">
         <header class="panel-header">
           <button class="panel-toggle" type="button" aria-expanded="true" title="Zwiń / rozwiń sekcję">
             <span class="chevron" aria-hidden="true"></span>Scenariusze
@@ -77,7 +83,7 @@
     </aside>
 
     <section id="center" class="center" aria-label="Oś czasu zdarzeń">
-      <div id="filters" class="filters" hidden></div>
+      <div id="filters" class="filters" hidden data-view="top.filters"></div>
       <div id="timeline" class="timeline-wrap"></div>
     </section>
 

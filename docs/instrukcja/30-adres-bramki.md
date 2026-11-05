@@ -4,6 +4,8 @@
 
 ![Pola Host i Port nad listą scenariuszy](img/30-adres-bramki.png)
 
+> Panel **Scenariusze** jest w widokach Standardowy i Pełny. Widok Prosty go ukrywa, patrz [Widok interfejsu](08-widok.md).
+
 Na górze sekcji **Scenariusze** są dwa pola, które mówią, dokąd scenariusze mają wysyłać wiadomości.
 Dzięki nim te same pliki scenariuszy działają u każdego klienta bez edycji.
 

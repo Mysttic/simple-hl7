@@ -4,6 +4,8 @@
 
 ![Lista ostatnich uruchomień scenariuszy ze statusem, godziną i czasem trwania](img/33-ostatnie-uruchomienia.png)
 
+> Panel **Scenariusze** jest w widokach Standardowy i Pełny. Widok Prosty go ukrywa, patrz [Widok interfejsu](08-widok.md).
+
 Lista pod kafelkami scenariuszy pokazuje wykonane przebiegi, od najnowszego.
 
 ## Elementy wiersza
