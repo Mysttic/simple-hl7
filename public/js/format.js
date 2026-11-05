@@ -622,15 +622,17 @@ export function badge(text, cls = '', title = null) {
   return el('span', { class: `badge ${cls}`.trim(), title }, text);
 }
 
+/** Label and value; opts.view is the view key that hides the pair (see view.js). */
 export function kv(label, value, opts = {}) {
-  return el('div', { class: `kv ${opts.class || ''}`.trim() },
+  return el('div', { class: `kv ${opts.class || ''}`.trim(), 'data-view': opts.view || null },
     el('div', { class: 'kv-label' }, label),
     el('div', { class: `kv-value ${opts.mono ? 'mono' : ''}`.trim(), title: opts.title || null }, value),
   );
 }
 
+/** Labelled form field; opts.class adds classes, opts.view is the view key that hides it (see view.js). */
 export function formField(label, input, hint = null, opts = {}) {
-  const field = el('div', { class: `form-field ${opts.class || ''}`.trim() });
+  const field = el('div', { class: `form-field ${opts.class || ''}`.trim(), 'data-view': opts.view || null });
   if (input && input.type === 'checkbox') {
     const id = input.id || `f-${Math.random().toString(36).slice(2, 9)}`;
     input.id = id;

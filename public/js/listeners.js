@@ -62,8 +62,8 @@ export function createListenersPanel({ root, ctx }) {
     return el('span', { class: 'sep' }, '·');
   }
 
-  function stat(label, value, cls = '', title = null) {
-    return el('div', { class: `stat ${cls}`.trim(), title },
+  function stat(label, value, cls = '', title = null, opts = {}) {
+    return el('div', { class: `stat ${cls}`.trim(), title, 'data-view': opts.view || null },
       el('div', { class: 'stat-label' }, label),
       el('div', { class: 'stat-value mono' }, value));
   }
@@ -88,13 +88,14 @@ export function createListenersPanel({ root, ctx }) {
     ));
 
     card.append(el('div', { class: 'card-line mono' },
-      el('span', { title: 'Adres i port nasłuchu' }, `${st.host || cfg.host}:${st.port || cfg.port}`), sep(),
-      el('span', { title: 'Oczekiwany prefix ramki (hex)' }, `prefix ${hexOrNone(cfg.prefixHex)}`), sep(),
-      el('span', { title: 'Oczekiwany suffix ramki (hex)' }, `suffix ${hexOrNone(cfg.suffixHex)}`), sep(),
-      el('span', { title: 'Kodowanie dekodowania payloadu' }, cfg.encoding || 'utf8'),
+      el('span', { title: 'Adres i port nasłuchu' }, `${st.host || cfg.host}:${st.port || cfg.port}`),
+      el('span', { 'data-view': 'listeners.framing' }, sep(),
+        el('span', { title: 'Oczekiwany prefix ramki (hex)' }, `prefix ${hexOrNone(cfg.prefixHex)}`), sep(),
+        el('span', { title: 'Oczekiwany suffix ramki (hex)' }, `suffix ${hexOrNone(cfg.suffixHex)}`), sep(),
+        el('span', { title: 'Kodowanie dekodowania payloadu' }, cfg.encoding || 'utf8')),
     ));
 
-    card.append(el('div', { class: 'card-line' },
+    card.append(el('div', { class: 'card-line', 'data-view': 'listeners.ack' },
       el('span', {}, 'ACK: '),
       badge(ack.mode || 'AA', ackModeClass(ack.mode), 'Tryb odpowiedzi ACK'),
       ack.delayMs > 0 ? el('span', { class: 'dim', title: 'Celowe opóźnienie ACK' }, ` +${formatMs(ack.delayMs)}`) : null,
@@ -110,18 +111,20 @@ export function createListenersPanel({ root, ctx }) {
 
     if (st.error) card.append(el('div', { class: 'card-error' }, String(st.error)));
 
+    // the first two stay in every view, the rest are the detailed statistics
+    const more = { view: 'listeners.stats' };
     const grid = el('div', { class: 'stat-grid' });
     grid.append(stat('Wiadomości', String(stats.messages ?? 0), '', 'Odebrane kompletne ramki'));
     grid.append(stat('ACK', String(stats.acksSent ?? 0), '', 'Wysłane ACK'));
-    grid.append(stat('Błędy ramki', String(stats.framingErrors ?? 0), stats.framingErrors > 0 ? 'bad' : '', 'Ramki z niezgodnym prefiksem lub sufiksem'));
-    grid.append(stat('Śmieci', formatBytes(stats.garbageBytes ?? 0), stats.garbageBytes > 0 ? 'warn' : '', 'Bajty poza ramką'));
-    grid.append(stat('In / Out', `${formatBytes(stats.bytesIn ?? 0)} / ${formatBytes(stats.bytesOut ?? 0)}`, '', 'Bajty odebrane / wysłane'));
+    grid.append(stat('Błędy ramki', String(stats.framingErrors ?? 0), stats.framingErrors > 0 ? 'bad' : '', 'Ramki z niezgodnym prefiksem lub sufiksem', more));
+    grid.append(stat('Śmieci', formatBytes(stats.garbageBytes ?? 0), stats.garbageBytes > 0 ? 'warn' : '', 'Bajty poza ramką', more));
+    grid.append(stat('In / Out', `${formatBytes(stats.bytesIn ?? 0)} / ${formatBytes(stats.bytesOut ?? 0)}`, '', 'Bajty odebrane / wysłane', more));
     const avg = stats.avgProcessingMs;
-    grid.append(stat('Przetw. śr.', Number.isFinite(avg) ? formatMs(avg) : 'brak', Number.isFinite(avg) ? latencyClass(avg, ctx.settings) : '', 'Średni czas od kompletnej ramki do wysłania ACK'));
+    grid.append(stat('Przetw. śr.', Number.isFinite(avg) ? formatMs(avg) : 'brak', Number.isFinite(avg) ? latencyClass(avg, ctx.settings) : '', 'Średni czas od kompletnej ramki do wysłania ACK', more));
     const min = stats.minProcessingMs;
     const max = stats.maxProcessingMs;
-    grid.append(stat('min / max', Number.isFinite(min) || Number.isFinite(max) ? `${Number.isFinite(min) ? formatMs(min) : '?'} / ${Number.isFinite(max) ? formatMs(max) : '?'}` : 'brak', Number.isFinite(max) ? latencyClass(max, ctx.settings) : '', 'Minimalny / maksymalny czas przetwarzania'));
-    grid.append(stat('Ostatnia', stats.lastMessageTs ? formatTime(stats.lastMessageTs, ctx.settings.utc) : 'brak', '', stats.lastMessageTs || 'Czas ostatniej wiadomości'));
+    grid.append(stat('min / max', Number.isFinite(min) || Number.isFinite(max) ? `${Number.isFinite(min) ? formatMs(min) : '?'} / ${Number.isFinite(max) ? formatMs(max) : '?'}` : 'brak', Number.isFinite(max) ? latencyClass(max, ctx.settings) : '', 'Minimalny / maksymalny czas przetwarzania', more));
+    grid.append(stat('Ostatnia', stats.lastMessageTs ? formatTime(stats.lastMessageTs, ctx.settings.utc) : 'brak', '', stats.lastMessageTs || 'Czas ostatniej wiadomości', more));
     card.append(grid);
 
     const actions = el('div', { class: 'card-actions' });
@@ -132,7 +135,10 @@ export function createListenersPanel({ root, ctx }) {
     }
     actions.append(btn('Edytuj', () => openEditor(st), 'Edytuj konfigurację nasłuchu', isBusy));
     actions.append(btn('Usuń', () => remove(st), 'Usuń nasłuch (z potwierdzeniem)', isBusy, 'btn btn-sm btn-danger'));
-    actions.append(btn('Zdarzenia', () => ctx.setEndpointFilter(st.id), 'Pokaż na osi czasu tylko zdarzenia tego nasłuchu', false, 'btn btn-sm btn-ghost'));
+    const eventsBtn = btn('Zdarzenia', () => ctx.setEndpointFilter(st.id), 'Pokaż na osi czasu tylko zdarzenia tego nasłuchu', false, 'btn btn-sm btn-ghost');
+    // it opens the filter bar, so it goes away with it
+    eventsBtn.dataset.view = 'top.filters';
+    actions.append(eventsBtn);
     card.append(actions);
     return card;
   }

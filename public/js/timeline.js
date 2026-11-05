@@ -12,17 +12,21 @@ const MAX_OPEN_REQUESTS = 300;
 const CHAIN_WALK_LIMIT = 80;
 const MAX_RELATED_HIGHLIGHT = 500;
 
+// view: the key in view.js that hides the column
 const COLUMNS = [
   { key: 'chain', label: '', width: 16, title: 'Łańcuch wiadomość -> ACK' },
   { key: 'time', label: 'Czas', width: 100, title: 'Czas zdarzenia (pełny ISO po najechaniu)' },
-  { key: 'delta', label: 'Δ', width: 78, title: 'Odstęp od poprzedniego widocznego wiersza' },
-  { key: 'endpoint', label: 'Punkt', width: 126, title: 'Nasłuch / nadawca / scenariusz i numer połączenia' },
+  { key: 'delta', label: 'Δ', width: 78, title: 'Odstęp od poprzedniego widocznego wiersza', view: 'timeline.delta' },
+  { key: 'endpoint', label: 'Punkt', width: 126, title: 'Nasłuch / nadawca / scenariusz i numer połączenia', view: 'timeline.endpoint' },
   { key: 'dir', label: '', width: 26, title: 'Kierunek' },
   { key: 'type', label: 'Typ', width: 124, title: 'Typ zdarzenia' },
   { key: 'summary', label: 'Opis', width: null, title: null },
   { key: 'latency', label: 'Czas odp.', width: 88, title: 'Czas odpowiedzi / przetwarzania (ms)' },
-  { key: 'bytes', label: 'Bajty', width: 72, title: 'Rozmiar' },
+  { key: 'bytes', label: 'Bajty', width: 72, title: 'Rozmiar', view: 'timeline.bytes' },
 ];
+
+// Connection bookkeeping, left out of the timeline and the export when the view hides it.
+const CONN_TYPES = new Set(['conn.open', 'conn.close', 'sender.connect']);
 
 const LEVEL_OPTIONS = [['', 'Wszystkie poziomy'], ['info', 'Info'], ['warn', 'Ostrzeżenia'], ['error', 'Błędy']];
 
@@ -65,13 +69,24 @@ export function createTimeline({ root, filtersRoot, ctx }) {
 
   // ---- DOM --------------------------------------------------------------------
 
+  const isHidden = (key) => !!(ctx.view && ctx.view.isHidden(key));
   const scroller = el('div', { class: 'timeline-scroll', tabindex: '0', 'aria-label': 'Oś czasu zdarzeń' });
   const table = el('table', { class: 'timeline' });
   const colgroup = el('colgroup');
-  for (const c of COLUMNS) colgroup.append(el('col', { class: `col-${c.key}`, style: c.width ? { width: `${c.width}px` } : null }));
-  const thead = el('thead', {}, el('tr', {}, ...COLUMNS.map((c) => el('th', { class: `c-${c.key}`, title: c.title }, c.label))));
+  const thead = el('thead');
   const tbody = el('tbody');
   table.append(colgroup, thead, tbody);
+  let columns = COLUMNS;
+
+  /** Widths and headers of the columns the view shows; renderRow() follows the same list. */
+  function buildHead() {
+    columns = COLUMNS.filter((c) => !c.view || !isHidden(c.view));
+    clear(colgroup);
+    clear(thead);
+    for (const c of columns) colgroup.append(el('col', { class: `col-${c.key}`, style: c.width ? { width: `${c.width}px` } : null }));
+    thead.append(el('tr', {}, ...columns.map((c) => el('th', { class: `c-${c.key}`, title: c.title }, c.label))));
+  }
+  buildHead();
   scroller.append(table);
   const emptyEl = el('div', { class: 'timeline-empty' }, 'Brak zdarzeń. Oczekiwanie na ruch MLLP...');
   const pill = el('button', { class: 'new-pill', type: 'button', hidden: true, title: 'Przewiń do najnowszych zdarzeń (End)' });
@@ -236,6 +251,7 @@ export function createTimeline({ root, filtersRoot, ctx }) {
 
   function matches(ev) {
     if (!ctx.settings.showBytes && (ev.type === 'bytes.in' || ev.type === 'bytes.out')) return false;
+    if (CONN_TYPES.has(ev.type) && isHidden('timeline.conn')) return false;
     if (filters.types && !filters.types.has(ev.type)) return false;
     if (filters.endpoint && ev.endpointId !== filters.endpoint) return false;
     if (filters.level && ev.level !== filters.level) return false;
@@ -283,22 +299,27 @@ export function createTimeline({ root, filtersRoot, ctx }) {
   function renderRow(ev, prev) {
     const summary = summaryPl(ev);
     const dir = ev.direction;
-    const bytes = bytesOf(ev);
-    const deltaMs = deltaBetween(prev, ev);
-    const tr = el('tr', { class: `ev lvl-${ev.level || 'info'}`, 'data-id': String(ev.id) });
-    tr.append(
-      el('td', { class: 'c-chain' }, el('span', { class: 'chain-mark' })),
-      el('td', { class: 'c-time', title: `${ev.ts}  (zdarzenie #${ev.id})` }, formatTime(ev.ts, ctx.settings.utc)),
-      el('td', { class: 'c-delta', title: deltaMs !== null ? `Odstęp od poprzedniego widocznego wiersza: ${formatMs(deltaMs)}` : null }, formatDelta(deltaMs)),
-      el('td', { class: 'c-endpoint', title: ev.connId ? `Połączenie ${ev.connId}` : (ev.endpointId || '') },
+    const cells = {
+      chain: () => el('td', { class: 'c-chain' }, el('span', { class: 'chain-mark' })),
+      time: () => el('td', { class: 'c-time', title: `${ev.ts}  (zdarzenie #${ev.id})` }, formatTime(ev.ts, ctx.settings.utc)),
+      delta: () => {
+        const deltaMs = deltaBetween(prev, ev);
+        return el('td', { class: 'c-delta', title: deltaMs !== null ? `Odstęp od poprzedniego widocznego wiersza: ${formatMs(deltaMs)}` : null }, formatDelta(deltaMs));
+      },
+      endpoint: () => el('td', { class: 'c-endpoint', title: ev.connId ? `Połączenie ${ev.connId}` : (ev.endpointId || '') },
         endpointLabel(ev.endpointId),
         ev.connId ? el('span', { class: 'conn-counter' }, connCounter(ev.connId)) : null),
-      el('td', { class: `c-dir ${dir ? `dir-${dir}` : ''}`.trim(), title: dir === 'in' ? 'Przychodzące' : dir === 'out' ? 'Wychodzące' : null }, directionArrow(ev)),
-      el('td', { class: 'c-type' }, badge(ev.type, typeClass(ev.type), typeLabel(ev.type))),
-      el('td', { class: 'c-summary', title: summary }, summary),
-      latencyCell(ev),
-      el('td', { class: 'c-bytes', title: bytes !== null ? `${bytes} B` : null }, formatBytes(bytes)),
-    );
+      dir: () => el('td', { class: `c-dir ${dir ? `dir-${dir}` : ''}`.trim(), title: dir === 'in' ? 'Przychodzące' : dir === 'out' ? 'Wychodzące' : null }, directionArrow(ev)),
+      type: () => el('td', { class: 'c-type' }, badge(ev.type, typeClass(ev.type), typeLabel(ev.type))),
+      summary: () => el('td', { class: 'c-summary', title: summary }, summary),
+      latency: () => latencyCell(ev),
+      bytes: () => {
+        const bytes = bytesOf(ev);
+        return el('td', { class: 'c-bytes', title: bytes !== null ? `${bytes} B` : null }, formatBytes(bytes));
+      },
+    };
+    const tr = el('tr', { class: `ev lvl-${ev.level || 'info'}`, 'data-id': String(ev.id) });
+    tr.append(...columns.map((c) => cells[c.key]()));
     if (ev.id === selectedId) tr.classList.add('selected');
     return tr;
   }
@@ -611,6 +632,21 @@ export function createTimeline({ root, filtersRoot, ctx }) {
     rerender();
   }
 
+  function resetFilters() {
+    filters.types = null;
+    filters.endpoint = '';
+    filters.text = '';
+    filters.level = '';
+    textInput.value = '';
+    levelSel.value = '';
+    syncTypeUi();
+    rebuildEndpointOptions();
+    levelSel.classList.remove('active');
+    endpointSel.classList.remove('active');
+    textInput.classList.remove('active');
+    rerender();
+  }
+
   function buildFilters() {
     if (!filtersRoot) return;
     const dd = el('div', { class: 'dd' });
@@ -668,20 +704,7 @@ export function createTimeline({ root, filtersRoot, ctx }) {
       }
     });
 
-    resetBtn.addEventListener('click', () => {
-      filters.types = null;
-      filters.endpoint = '';
-      filters.text = '';
-      filters.level = '';
-      textInput.value = '';
-      levelSel.value = '';
-      syncTypeUi();
-      rebuildEndpointOptions();
-      levelSel.classList.remove('active');
-      endpointSel.classList.remove('active');
-      textInput.classList.remove('active');
-      rerender();
-    });
+    resetBtn.addEventListener('click', resetFilters);
 
     filtersRoot.append(
       el('div', { class: 'filter-group' }, dd),
@@ -786,7 +809,13 @@ export function createTimeline({ root, filtersRoot, ctx }) {
 
   function getFilters() {
     let types = filters.types ? [...filters.types] : null;
-    if (!types && !ctx.settings.showBytes) types = allTypes().filter((t) => t !== 'bytes.in' && t !== 'bytes.out');
+    // with no type filter the export skips what the timeline leaves out: bytes.* and, when the view
+    // hides them, the connection events
+    const hideBytes = !ctx.settings.showBytes;
+    const hideConn = isHidden('timeline.conn');
+    if (!types && (hideBytes || hideConn)) {
+      types = allTypes().filter((t) => !(hideBytes && (t === 'bytes.in' || t === 'bytes.out')) && !(hideConn && CONN_TYPES.has(t)));
+    }
     return {
       types,
       endpointId: filters.endpoint || null,
@@ -832,6 +861,11 @@ export function createTimeline({ root, filtersRoot, ctx }) {
       rerender();
     },
     refresh: rerender,
+    /** Columns and connection events follow the current view. */
+    applyView: () => {
+      buildHead();
+      rerender();
+    },
     getEvent: (id) => byId.get(id) || null,
     getPair: (id) => (pairs.has(id) ? byId.get(pairs.get(id)) || null : null),
     getPairId: (id) => (pairs.has(id) ? pairs.get(id) : null),
@@ -846,6 +880,7 @@ export function createTimeline({ root, filtersRoot, ctx }) {
     resume,
     getFilters,
     setFilters,
+    resetFilters,
     hasActiveFilters,
     counts: () => ({ visible: rows.size, total: events.length, max: MAX_ROWS }),
     onSelect: (fn) => { selectHandler = typeof fn === 'function' ? fn : () => {}; },

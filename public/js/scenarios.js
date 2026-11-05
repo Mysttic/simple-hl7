@@ -294,7 +294,7 @@ export function createScenariosPanel({ root, ctx }) {
       ` · kroki OK ${passed}/${steps.length}`,
       run.file ? ` · ${run.file}` : ''));
     detailsEl.append(el('div', { class: 'run-actions' },
-      el('button', { class: 'btn btn-xs', type: 'button', title: 'Filtruj oś czasu do zdarzeń tego uruchomienia', onClick: () => ctx.setEndpointFilter(run.runId) }, 'Zdarzenia tego uruchomienia'),
+      el('button', { class: 'btn btn-xs', type: 'button', title: 'Filtruj oś czasu do zdarzeń tego uruchomienia', 'data-view': 'top.filters', onClick: () => ctx.setEndpointFilter(run.runId) }, 'Zdarzenia tego uruchomienia'),
       el('button', { class: 'btn btn-xs', type: 'button', title: 'Skopiuj wynik jako JSON', onClick: () => ctx.copy(JSON.stringify(run, null, 2), 'Wynik scenariusza') }, 'Kopiuj JSON')));
     if (run.error) detailsEl.append(el('div', { class: 'text-error' }, String(run.error)));
     const stepsEl = el('div', { class: 'steps' });

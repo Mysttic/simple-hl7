@@ -2,10 +2,17 @@
 
 [Spis treści](README.md) · Poprzednia: [Menu Eksport](03-menu-eksport.md) · Następna: [Czyszczenie zdarzeń](05-czyszczenie-zdarzen.md) <!-- nav -->
 
-![Okno Ustawienia: progi czasów, pokazywanie zdarzeń bajtów, czas UTC](img/04-okno-ustawien.png)
+![Okno Ustawienia: widok interfejsu, progi czasów, pokazywanie zdarzeń bajtów, czas UTC](img/04-okno-ustawien.png)
 
-Okno otwiera przycisk **⚙ Ustawienia** w górnym pasku. Ma dwie części, które zapisują się w różnych
-miejscach.
+Okno otwiera przycisk **⚙ Ustawienia** w górnym pasku. Ma trzy części. Progi zapisują się na serwerze,
+widok i wyświetlanie w przeglądarce.
+
+## Widok interfejsu (zapisywany w tej przeglądarce)
+
+Lista **Widok** wybiera, ile szczegółów pokazuje ekran: **Prosty**, **Standardowy**, **Pełny** albo
+**Własny**. Pod nią jest licznik widocznych elementów i 29 elementów w sześciu grupach. Zaznaczony
+element jest widoczny, a zmiana dowolnego pola przełącza listę na **Własny**. Ekran zmienia się od razu,
+jeszcze przed zapisem. Co zawiera każdy widok, opisuje strona [Widok interfejsu](08-widok.md).
 
 ## Progi czasów odpowiedzi (zapisywane na serwerze)
 
@@ -24,7 +31,7 @@ musi być większy od progu ostrzeżenia, inaczej okno pokaże błąd przy polu 
 Ustaw progi według umowy z klientem. Przy SLA „odpowiedź w ciągu 1 sekundy” sensowne są np. 500 ms
 (ostrzeżenie) i 1000 ms (błąd).
 
-## Widok (zapisywane w tej przeglądarce)
+## Wyświetlanie (zapisywane w tej przeglądarce)
 
 | Pole | Domyślnie | Znaczenie |
 |---|---|---|
@@ -38,7 +45,7 @@ serwerze z zegara monotonicznego, więc korekta ani zmiana zegara systemowego na
 ## Przyciski
 
 - **Zapisz** zapisuje zmiany i odświeża kolory na osi czasu, w kafelkach i w inspektorze.
-- **Anuluj**, `×` albo `Esc` zamykają okno bez zmian.
+- **Anuluj**, `×` albo `Esc` zamykają okno bez zmian. Widok wybrany w oknie wraca do poprzedniego.
 
 ---
 

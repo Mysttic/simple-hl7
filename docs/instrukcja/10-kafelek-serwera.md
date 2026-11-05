@@ -1,8 +1,10 @@
 # Kafelek serwera
 
-[Spis treści](README.md) · Poprzednia: [Powiadomienia](07-powiadomienia.md) · Następna: [Stany kafelka serwera](11-stany-serwera.md) <!-- nav -->
+[Spis treści](README.md) · Poprzednia: [Widok interfejsu](08-widok.md) · Następna: [Stany kafelka serwera](11-stany-serwera.md) <!-- nav -->
 
 ![Kafelek działającego serwera Bramka ADT (test)](img/10-kafelek-serwera.png)
+
+> W widoku Prosty kafelek pokazuje nazwę, adres, stan, liczniki **Wiadomości** i **ACK** oraz przyciski. Widok Standardowy dodaje ramkę, kodowanie i pozostałe statystyki, a Pełny także linię ACK i połączeń, patrz [Widok interfejsu](08-widok.md).
 
 Sekcja **Serwer** w lewej kolumnie ma jeden kafelek na każdy listener, czyli port, na którym tester
 czeka na połączenia od bramki. Kafelek pokazuje konfigurację, stan i statystyki na żywo. Nowy listener
@@ -83,4 +85,4 @@ W trakcie operacji (start, stop, usuwanie) przyciski są chwilowo nieaktywne. Wy
 
 ---
 
-[Spis treści](README.md) · Poprzednia: [Powiadomienia](07-powiadomienia.md) · Następna: [Stany kafelka serwera](11-stany-serwera.md) <!-- nav -->
+[Spis treści](README.md) · Poprzednia: [Widok interfejsu](08-widok.md) · Następna: [Stany kafelka serwera](11-stany-serwera.md) <!-- nav -->

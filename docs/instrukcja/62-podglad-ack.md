@@ -4,6 +4,8 @@
 
 ![Okno „Podgląd ACK” z kodem AA i wygenerowanym ACK](img/62-podglad-ack.png)
 
+> Przycisk **Podgląd ACK** jest w widoku Pełny, patrz [Widok interfejsu](08-widok.md).
+
 Okno otwiera przycisk **Podgląd ACK** w inspektorze odebranej wiadomości (`msg.in`). Pokazuje ACK,
 jaki listener testera zbudowałby dla tej wiadomości przy wybranych ustawieniach. Niczego nie wysyła.
 W tytule jest control id wiadomości.

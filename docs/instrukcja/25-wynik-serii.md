@@ -4,6 +4,8 @@
 
 ![Wynik serii pięciu wysyłek: podsumowanie, tabela, szczegóły jednej wysyłki](img/25-wynik-serii.png)
 
+> Pola serii (**Powtórzenia**, **Odstęp**, **Jedno połączenie**) są w widoku Pełny, patrz [Widok interfejsu](08-widok.md).
+
 Gdy pole **Powtórzenia** ma wartość większą niż 1, tester wysyła serię wiadomości i po zakończeniu
 całej serii pokazuje trzy części: podsumowanie, tabelę wysyłek i szczegóły jednej z nich. W trakcie
 serii karta pokazuje napis „Wysyłanie do host:port (N razy)...”, a kolejne wysyłki widać na bieżąco

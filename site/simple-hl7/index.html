@@ -92,8 +92,7 @@
       the program running next to the gateway.
     </p>
 
-    <!-- Eight cards: two columns keep the rows even. -->
-    <div class="features" style="grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr))">
+    <div class="features">
       <div class="feature">
         <h3>Server and client at once</h3>
         <p>
@@ -168,7 +167,9 @@
     One window: what to send and listen on to the left, everything that happened
     in the middle, the selected event to the right.
   </p>
-  <div class="shots two">
+  <!-- Narrow panels, so three to a row like the phone shots on the Chatt page:
+       the three inspector views first, then the sending side. -->
+  <div class="shots three">
     <figure>
       <img src="img/framing.png" alt="The inspector showing a frame that ended with 0D 0A instead of 1C 0D" loading="lazy" decoding="async">
       <figcaption>A wrong suffix from the gateway, caught and explained</figcaption>
@@ -177,8 +178,10 @@
       <img src="img/hex.png" alt="The hex view of a frame with the prefix and suffix bytes marked" loading="lazy" decoding="async">
       <figcaption>The frame in hex, prefix and suffix marked</figcaption>
     </figure>
-  </div>
-  <div class="shots two">
+    <figure>
+      <img src="img/tree.png" alt="The tree view of an ORU^R01 result with segment and field names" loading="lazy" decoding="async">
+      <figcaption>A lab result as a tree, with the field names from HL7 2.5</figcaption>
+    </figure>
     <figure>
       <img src="img/client.png" alt="The result of a send: ACK AA, matching control id and a timing bar" loading="lazy" decoding="async">
       <figcaption>The gateway's answer and where the time went</figcaption>
@@ -188,10 +191,6 @@
       <figcaption>Ready scenarios, pointed at the gateway</figcaption>
     </figure>
   </div>
-  <figure class="shot-wide">
-    <img src="img/tree.png" alt="The tree view of an ORU^R01 result with segment and field names" loading="lazy" decoding="async">
-    <figcaption>A lab result as a tree, with the field names from HL7 2.5</figcaption>
-  </figure>
 </section>
 
 <section class="band">

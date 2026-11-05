@@ -1,5 +1,6 @@
 // Captures the screenshots used by README.md into docs/img/ and copies six of them to the project
-// page in site/simple-hl7/img/.
+// page in site/simple-hl7/img/. The main screenshot shows the view a new user gets (Prosty), the
+// second one the same moment in the full view; the detail shots are taken in the full view.
 //
 // Starts the app from source with a throwaway config, produces realistic traffic against its own
 // listener (scenarios, a wrong suffix, a loop with a result coming back), drives a headless Edge or
@@ -45,13 +46,22 @@ run(async () => {
 
   const page = await openBrowser({ profile: path.join(WORK, 'browser-profile'), cdpPort: 9334, width: 1920, height: 1080 });
   const shot = (name, opts) => page.shot(path.join(OUT, name), opts);
+  // the view switch in the top bar (public/js/view.js)
+  const setView = (preset) => page.eval(`(() => {
+    const s = document.getElementById('view-select');
+    s.value = ${JSON.stringify(preset)};
+    s.dispatchEvent(new Event('change'));
+  })()`);
 
   console.log('capturing');
-  // sender form prepared like an operator would fill it, gateway = the local listener
+  // sender form prepared like an operator would fill it, gateway = the local listener; the view a new user gets.
+  // Only visible fields differ from the defaults, so Prosty shows no hint about hidden values
+  // (the example has {{controlId}} in MSH-10 anyway).
   await page.goto(`${base}/`);
   await page.eval(`localStorage.setItem('hl7t.sender.form.v1', ${JSON.stringify(JSON.stringify({
-    host: '127.0.0.1', port: LISTENER_PORT, encoding: 'iso88592', autoControlId: true, message: example('adt_a01.hl7').replace('UNICODE UTF-8', '8859/2'),
+    host: '127.0.0.1', port: LISTENER_PORT, encoding: 'iso88592', message: example('adt_a01.hl7').replace('UNICODE UTF-8', '8859/2'),
   }))})`);
+  await page.eval(`localStorage.setItem('hl7t.ui.settings.v1', ${JSON.stringify(JSON.stringify({ view: { preset: 'simple', custom: null } }))})`);
   await page.goto(`${base}/`);
   await page.until(`document.querySelectorAll('#timeline tr.ev').length > 20`, 'the timeline');
 
@@ -60,10 +70,14 @@ run(async () => {
   const broken = events.find((e) => e.type === 'frame.incomplete');
   const oru = events.find((e) => e.type === 'msg.in' && e.data?.summary?.messageType === 'ORU');
 
-  // 1. main view: timeline, ADT^A01 in the inspector with coloured segments
+  // 1. main view in Prosty: timeline, ADT^A01 in the inspector with coloured segments
   await page.click(`#timeline tr.ev[data-id="${adt.id}"]`);
   await page.until(`document.querySelector('.insp-tabs button')`, 'the inspector');
   await shot('glowny.png');
+  // the same moment in the full view (README, section on views); everything below needs it too
+  await setView('full');
+  await sleep(300);
+  await shot('glowny-pelny.png');
   // 2. hex dump of the same frame with the prefix and suffix marked
   await page.clickText('.insp-tabs', 'Hex');
   await shot('inspektor-hex.png', { selectors: ['#inspector'], pad: 0 });

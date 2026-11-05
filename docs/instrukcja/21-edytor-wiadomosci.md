@@ -4,6 +4,8 @@
 
 ![Edytor wiadomości: wybór celu i przykładu, pokolorowana treść, linia stanu, przyciski](img/21-edytor-wiadomosci.png)
 
+> Linię stanu i przycisk **Podgląd szablonu** pokazuje widok Pełny, patrz [Widok interfejsu](08-widok.md).
+
 Dolna część sekcji Klient to miejsce na treść wiadomości HL7 i przyciski wysyłki.
 
 ## Elementy

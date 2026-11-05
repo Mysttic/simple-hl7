@@ -6,6 +6,8 @@ Poprawna ramka MLLP:
 
 ![Znaczki poprawnej ramki: Prefix OK, Suffix OK, Separator CR, Końcowy CR OK, Non-ASCII, Wariant](img/51-znaczki-ramki-ok.png)
 
+> Znaczki ramki są w widokach Standardowy i Pełny, patrz [Widok interfejsu](08-widok.md).
+
 Ramka ze złym sufiksem:
 
 ![Znaczki ramki ze złym sufiksem: czerwony znaczek sufiksu, separator mieszany, wariant 0D 0A](img/51-znaczki-ramki-blad.png)

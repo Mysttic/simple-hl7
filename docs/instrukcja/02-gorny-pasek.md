@@ -18,16 +18,23 @@ przyciski, które działają na całą oś czasu.
 | Zegar `HH:mm:ss.SSS` | czas serwera z milisekundami. Przeglądarka koryguje go o różnicę między swoim zegarem a zegarem serwera, więc pokazuje czas, który program zapisuje w zdarzeniach. Po najechaniu widać wielkość korekty i RTT. W trybie UTC (Ustawienia) za czasem stoi dopisek `UTC` |
 | Licznik `widoczne / wszystkie` | pierwsza liczba: ile wierszy pokazuje oś czasu po filtrach; druga: ile zdarzeń przeglądarka trzyma w pamięci (najwyżej 2000). Po najechaniu widać też, ile zdarzeń jest w pamięci programu i ile program już odrzucił z bufora |
 
+Zegar i licznik pokazuje widok **Pełny**. Widoki Prosty i Standardowy je ukrywają, patrz [Widok interfejsu](08-widok.md).
+
 ## Prawa część: przyciski
 
 | Przycisk | Działanie |
 |---|---|
+| **Widok** (lista) | wybiera [widok interfejsu](08-widok.md): **Prosty**, **Standardowy**, **Pełny** albo **Własny**. Ekran zmienia się od razu, a wybór zapisuje się w tej przeglądarce |
 | **⏸ Autoprzewijanie** | wstrzymuje przewijanie osi czasu do najnowszych zdarzeń. Po wstrzymaniu napis zmienia się na **▶ Wznów (N)**, gdzie N to liczba zdarzeń, które przyszły w tym czasie. Klawisz: `Spacja`. Szczegóły: [Wstrzymane przewijanie](43-wstrzymane-przewijanie.md) |
 | **Filtry** | pokazuje i chowa [pasek filtrów](41-pasek-filtrow.md) nad osią czasu. Podświetlony przycisk oznacza widoczny pasek. Klawisz: `/` |
 | **Eksport ▾** | rozwija [menu eksportu](03-menu-eksport.md) zdarzeń do pliku |
 | **Wyczyść** (czerwony napis) | usuwa zdarzenia z pamięci programu i z osi czasu, po potwierdzeniu. Szczegóły: [Czyszczenie zdarzeń](05-czyszczenie-zdarzen.md) |
-| **⚙ Ustawienia** | otwiera [okno ustawień](04-okno-ustawien.md): progi kolorów czasów, zdarzenia bajtów, strefa czasu |
+| **⚙ Ustawienia** | otwiera [okno ustawień](04-okno-ustawien.md): widok interfejsu, progi kolorów czasów, zdarzenia bajtów, strefa czasu |
 | **Inspektor** | chowa i pokazuje panel inspektora po prawej. Podświetlony przycisk oznacza widoczny inspektor. Klawisz: `i` |
+
+W widoku Prosty pasek ma tylko **Widok**, **Wyczyść**, **⚙ Ustawienia** i **Inspektor**. Widok
+Standardowy dodaje **Filtry** i **Eksport**, a **⏸ Autoprzewijanie** jest w widoku Pełny. Bez tego
+przycisku przewijanie nadal wstrzymuje `Spacja` albo przewinięcie osi czasu w górę.
 
 ## Typowe sytuacje
 

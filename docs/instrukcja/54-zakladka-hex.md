@@ -4,6 +4,8 @@
 
 ![Zakładka Hex: zrzut bajtów ramki z zaznaczonym prefiksem i sufiksem](img/54-zakladka-hex.png)
 
+> Zakładka **Hex** i przycisk **Kopiuj hex** są w widokach Standardowy i Pełny, patrz [Widok interfejsu](08-widok.md).
+
 Trzecia zakładka inspektora pokazuje surowe bajty, tak jak przyszły albo wyszły przez sieć: całą
 ramkę razem z prefiksem i sufiksem. Rozstrzyga spory, które w tekście nie są widoczne: jaki dokładnie
 jest sufiks, czy segmenty kończą się CR czy LF, w jakim kodowaniu są polskie znaki.

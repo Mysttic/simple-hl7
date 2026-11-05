@@ -4,6 +4,8 @@
 
 ![Karta nieudanej wysyłki: brak ACK po 1500 ms w fazie oczekiwania na ACK](img/24-wynik-wysylki-blad.png)
 
+> Widoki Prosty i Standardowy pokazują w wyniku ACK, MSA-1 i MSA-2, a ukrywają ramkę ACK, rozmiar i pasek czasów, patrz [Widok interfejsu](08-widok.md).
+
 Gdy wymiana się nie uda, karta wyniku ma czerwony znaczek **BŁĄD**, opis błędu i fazę, w której
 wystąpił. Pasek czasów pokazuje odcinki, które zdążyły się wykonać. Na zrzucie połączenie i wysyłka
 się udały, a ACK nie przyszedł.

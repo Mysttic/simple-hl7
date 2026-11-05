@@ -7,6 +7,34 @@ ostatniego wydanego tagu.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-05
+
+Pierwsze oficjalne wydanie publiczne.
+
+### Dodane
+
+- Widok interfejsu ([#4](https://github.com/Mysttic/simple-hl7/issues/4)): lista **Widok** w górnym pasku
+  i sekcja w oknie Ustawienia przełączają między widokami Prosty, Standardowy, Pełny i Własny (dowolny
+  zestaw z 29 elementów ekranu). Nowa przeglądarka zaczyna w widoku Prosty, a przeglądarka używana
+  wcześniej w widoku Pełny, czyli bez zmian na ekranie.
+- Panel Klient pokazuje ukryte w bieżącym widoku pola z wartością inną niż domyślna i link
+  **Przywróć domyślne**. Błąd w ukrytym polu przy wysyłce podaje nazwę pola.
+- Instrukcja: strona [Widok interfejsu](docs/instrukcja/08-widok.md) i uwaga o widokach na stronach
+  elementów, których nie ma w każdym widoku.
+- Plik `LICENSE` (MIT) i sekcja Licencja w README.
+
+### Zmienione
+
+- Główny zrzut w README i na stronie projektu pokazuje widok Prosty; widok Pełny ma w README osobny zrzut.
+- Sekcja okna Ustawienia z czasem UTC i zdarzeniami bajtów nazywa się **Wyświetlanie**.
+- Widok bez paska filtrów czyści aktywne filtry osi czasu. Gdy widok ukrywa zdarzenia połączeń,
+  eksport bez filtra typów też je pomija.
+- Przykłady i scenariusze nie mają danych, które mogłyby należeć do prawdziwych osób: PESEL
+  w `siu_s12.hl7` nie przechodzi kontroli sumy, a numery telefonów leżą poza planem numeracji
+  (`+48 0...`) ([#5](https://github.com/Mysttic/simple-hl7/issues/5)).
+- Strona projektu w `site/simple-hl7` ma układ z huba (zrzuty po trzy w rzędzie) i poprawny port
+  w przykładzie z tunelem SSH.
+
 ## [0.1.1] - 2026-10-08
 
 ### Dodane

@@ -4,6 +4,8 @@
 
 ![Rozwinięta lista typów zdarzeń z licznikami i szybkimi grupami](img/42-filtr-typow.png)
 
+> Filtry są w widokach Standardowy i Pełny. Widok Prosty je ukrywa i czyści, patrz [Widok interfejsu](08-widok.md).
+
 Przycisk **Typy** w pasku filtrów rozwija listę wszystkich typów zdarzeń. Odznaczony typ znika z osi
 czasu. Lista zamyka się po kliknięciu poza nią albo klawiszem `Esc`.
 
